@@ -1,0 +1,10 @@
+{
+  "developerGroup": "Neptune Showroom",
+  "note": "Bundle ids are placeholders; replace with ids registered under the Neptune Showroom Apple/Google developer accounts before building.",
+  "apps": [
+    { "id": "neptune-mobile",       "name": "Neptune Mobile",            "bundleId": "ly.neptune.showroom.mobile",      "dir": "mobile",       "start": "mobile/index.html",       "extra": ["shared"] },
+    { "id": "neptune-vega",         "name": "Neptune Vega",              "bundleId": "ly.neptune.showroom.vega",        "dir": "vega",         "start": "vega/app/index.html",     "extra": ["shared", "hub/assets"] },
+    { "id": "neptune-mobile-telco", "name": "Neptune Mobile for Telco",  "bundleId": "ly.neptune.showroom.mobiletelco", "dir": "telco",        "start": "telco/mobile/index.html", "extra": ["shared"] },
+    { "id": "neptune-vega-telco",   "name": "Neptune Vega for Telco",    "bundleId": "ly.neptune.showroom.vegatelco",   "dir": "telco",        "start": "telco/vega/index.html",   "extra": ["shared"] }
+  ]
+}

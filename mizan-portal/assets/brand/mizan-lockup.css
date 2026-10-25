@@ -1,0 +1,10 @@
+/* Neptune Mizan product lockup: inline mark (currentColor stroke + coral bar) + wordmark. Neptune corporate logo is a separate asset. */
+.mz-lock{display:inline-flex;align-items:center;gap:12px;color:inherit;text-decoration:none;line-height:1}
+.mz-mark{width:var(--mz-size,40px);height:var(--mz-size,40px);flex:none;display:block}
+.mz-mark path{stroke:currentColor}
+.mz-mark rect{fill:#EB4E4D}
+.mz-txt{display:flex;flex-direction:column;gap:5px}
+.mz-word{font:700 calc(var(--mz-size,40px)*.75)/1 "Hanken Grotesk",system-ui,sans-serif;letter-spacing:-.02em}
+.mz-by{font:500 calc(var(--mz-size,40px)*.26)/1 "Hanken Grotesk",system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;opacity:.75}
+[dir=rtl] .mz-word{font-family:"Beiruti","Hanken Grotesk",sans-serif;font-weight:800;letter-spacing:0;line-height:1.05}
+[dir=rtl] .mz-by{font-family:"Beiruti","Hanken Grotesk",sans-serif;letter-spacing:0;text-transform:none;font-size:calc(var(--mz-size,40px)*.34)}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-look="vibrant" data-kind="lively" data-odyssey-mode="light" data-odyssey-product="core">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vega by Neptune — Showroom</title>
+<meta name="description" content="Demonstration — simulated data. Vega by Neptune: white-label wallet app (PWA) and tenant operations console.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="app/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/odyssey.css">
+<link rel="stylesheet" href="assets/looks/looks.css">
+<link rel="stylesheet" href="assets/looks/looks-picker.css">
+<link rel="stylesheet" href="assets/vega.css">
+<style>
+body{overflow:auto;background:var(--bg)}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 24px 64px;display:flex;flex-direction:column;gap:34px}
+header{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.sepv{width:2px;height:28px;background:var(--line)}.sp{flex:1}
+h1{font:var(--look-display-weight,800) clamp(34px,5vw,60px)/1.02 var(--display);letter-spacing:-.025em;max-width:20ch;text-wrap:balance}
+.lead2{max-width:56ch;color:var(--muted);font-size:18px}
+.tag{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border-radius:99px;background:var(--warn-bg);color:var(--warn);font-weight:700;font-size:12.5px;width:max-content}
+[data-odyssey-mode=dark] .tag{color:#FFD58A}
+.cards{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:20px}@media (max-width:900px){.cards{grid-template-columns:1fr}}
+.pc{position:relative;display:flex;flex-direction:column;gap:14px;padding:22px;border-radius:var(--r-pocket);background:var(--surface);box-shadow:0 0 0 1px var(--line);overflow:hidden;text-decoration:none;color:inherit;transition:transform .5s var(--spring),box-shadow .3s}
+.pc:hover{transform:translateY(-6px);box-shadow:0 0 0 2px var(--look-brand),0 30px 60px -30px rgba(0,0,0,.4)}
+.pc h2{font:700 26px/1.1 var(--display)}.pc p{color:var(--muted)}
+.prev{position:relative;height:340px;border-radius:var(--r-card);background:var(--cont);overflow:hidden}.prev iframe{position:absolute;border:0;pointer-events:none;transform-origin:top left;background:var(--bg)}
+.prev.app iframe{width:390px;height:844px;transform:scale(.46);left:50%;margin-left:-90px;top:14px;border-radius:30px;box-shadow:0 20px 40px -16px rgba(0,0,0,.5)}
+.prev.con iframe{width:1440px;height:900px;transform:scale(.4);left:14px;top:14px;border-radius:20px;box-shadow:0 20px 40px -16px rgba(0,0,0,.4)}
+.ul{display:flex;flex-wrap:wrap;gap:8px}.ul span{padding:5px 12px;border-radius:99px;background:var(--cont);font-size:13px;font-weight:600}
+.go{display:inline-flex;align-items:center;gap:10px;font-weight:700;color:var(--look-brand)}[data-odyssey-mode=dark] .go{color:var(--look-accent)}
+.tools{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+footer{display:flex;gap:16px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:13px}
+</style>
+<script src="assets/looks/looks.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header><span id="lock"></span><span class="sepv"></span><span id="nep"></span><span class="sp"></span><div class="seg" id="lang" style="min-width:210px"></div></header>
+  <section style="display:flex;flex-direction:column;gap:16px"><span class="tag" id="tag"></span><h1 id="h1"></h1><p class="lead2" id="p"></p><div class="tools"><div id="picker"></div></div></section>
+  <section class="cards">
+    <a class="pc" id="ca" href="app/"><div class="prev app" aria-hidden="true"><iframe id="fa" title="" loading="lazy" tabindex="-1"></iframe></div><div><h2 id="ta"></h2><p id="pa"></p></div><div class="ul" id="ua"></div><span class="go" id="ga"></span></a>
+    <a class="pc" id="cc" href="console/"><div class="prev con" aria-hidden="true"><iframe id="fc" title="" loading="lazy" tabindex="-1"></iframe></div><div><h2 id="tc"></h2><p id="pc"></p></div><div class="ul" id="uc"></div><span class="go" id="gc"></span></a>
+  </section>
+  <footer><span id="note"></span><span class="sp"></span><span id="legal"></span></footer>
+</div>
+<script type="module">
+import { boot, st, t, add, ic, setLang, onChange, vegaLockup, neptuneLogo, applyRoot } from './assets/core.js';
+add({
+  h1: 'One wallet platform. Your brand, your market.§Une plateforme de portefeuille. Votre marque, votre marché.§منصة محفظة واحدة. علامتك وسوقك.',
+  p: 'Vega by Neptune is a white-label professional wallet: a delightful consumer app and a full tenant operations console, ready to wear any bank, fintech or telco brand.§Vega by Neptune est un portefeuille professionnel en marque blanche : une application grand public soignée et une console d’exploitation complète, à l’image de toute banque, fintech ou opérateur.§Vega by Neptune محفظة احترافية بعلامة بيضاء: تطبيق للعملاء بتجربة ممتعة ولوحة تشغيل كاملة للمشغّل، تتلبّس هوية أي مصرف أو شركة تقنية مالية أو مشغّل اتصالات.',
+  ta: 'Wallet app (installable PWA)§Application portefeuille (PWA installable)§تطبيق المحفظة (PWA قابل للتثبيت)', pa: 'Send, request, scan to pay, cash in/out at agents, bills, pockets, cards, rewards, KYC upgrade and support — in EN / FR / AR.§Envoi, demande, paiement par QR, dépôt/retrait chez les agents, factures, poches, cartes, récompenses, KYC et assistance — EN / FR / AR.§إرسال وطلب ودفع بالمسح وإيداع وسحب لدى الوكلاء وفواتير وجيوب وبطاقات ومكافآت وتوثيق ودعم — بثلاث لغات.',
+  tc: 'Tenant operations console§Console d’exploitation du locataire§لوحة تشغيل المشغّل', pc: 'Dashboard, customers, wallets, transactions, KYC review, limits & fees, agent network, reconciliation, risk, reports, roles and a live brand studio.§Tableau de bord, clients, portefeuilles, transactions, revue KYC, plafonds et frais, réseau d’agents, rapprochement, risques, rapports, rôles et studio de marque en direct.§لوحة المؤشرات والعملاء والمحافظ والمعاملات ومراجعة التوثيق والحدود والرسوم وشبكة الوكلاء والتسوية والمخاطر والتقارير والأدوار واستوديو الهوية المباشر.',
+  open_a: 'Open the wallet§Ouvrir le portefeuille§افتح المحفظة', open_c: 'Open the console§Ouvrir la console§افتح لوحة التشغيل', note: 'Invented institutions, people and numbers. No backend. Only the public Odyssey 3 kit is shared.§Institutions, personnes et chiffres inventés. Aucun serveur. Seul le kit public Odyssey 3 est partagé.§مؤسسات وأشخاص وأرقام مُختلقة. لا خادم. يُستخدم فقط طقم Odyssey 3 العام.',
+  u1: 'QR pay§Paiement QR§دفع QR', u2: 'Agents map§Carte des agents§خريطة الوكلاء', u3: 'Pockets§Poches§الجيوب', u4: 'Cards§Cartes§البطاقات', u5: 'KYC tiers§Niveaux KYC§مستويات التوثيق', u6: 'Maker-checker§Double validation§الموافقة المزدوجة', u7: 'Reconciliation§Rapprochement§التسوية', u8: 'Brand studio§Studio de marque§استوديو الهوية', u9: 'Risk rules§Règles de risque§قواعد المخاطر'
+});
+boot({ product: 'home', defaultLook: 'vibrant' });
+function draw() {
+  const q = `?look=${st.look}&lang=${st.lang}&theme=${st.theme}`;
+  document.getElementById('lock').innerHTML = vegaLockup(); document.getElementById('nep').innerHTML = neptuneLogo();
+  document.getElementById('lang').innerHTML = [['en', 'English'], ['fr', 'Français'], ['ar', 'العربية']].map(([k, n]) => `<button aria-selected="${st.lang === k}" data-l="${k}">${n}</button>`).join('');
+  document.getElementById('tag').innerHTML = `${ic('info', 'sm')} ${t('demo_label')}`;
+  ['h1', 'p', 'ta', 'pa', 'tc', 'note'].forEach(k => document.getElementById(k).textContent = t(k)); document.getElementById('pc').textContent = t('pc');
+  document.getElementById('legal').textContent = t('demo_label');
+  document.getElementById('ga').innerHTML = `${t('open_a')} ${ic('arrow-right', 'sm flip')}`; document.getElementById('gc').innerHTML = `${t('open_c')} ${ic('arrow-right', 'sm flip')}`;
+  document.getElementById('ua').innerHTML = ['u1', 'u2', 'u3', 'u4'].map(k => `<span>${t(k)}</span>`).join(''); document.getElementById('uc').innerHTML = ['u5', 'u6', 'u7', 'u8', 'u9'].map(k => `<span>${t(k)}</span>`).join('');
+  document.getElementById('ca').href = 'app/' + q; document.getElementById('cc').href = 'console/' + q.replace(/look=[a-z]+/, 'look=' + (st.look === 'vibrant' ? 'classic' : st.look));
+  const fa = document.getElementById('fa'), fc = document.getElementById('fc'); const sa = `app/${q}&splash=0&sw=0`, sc = `console/${q.replace(/look=[a-z]+/, 'look=' + (st.look === 'vibrant' ? 'classic' : st.look))}`;
+  if (fa.dataset.s !== sa) { fa.src = sa; fa.dataset.s = sa; } if (fc.dataset.s !== sc) { fc.src = sc; fc.dataset.s = sc; }
+}
+window.Looks.mount(document.getElementById('picker'), { label: t('look') });
+document.getElementById('lang').addEventListener('click', e => { const b = e.target.closest('[data-l]'); if (b) setLang(b.dataset.l); });
+onChange(draw); draw();
+</script>
+</body>
+</html>

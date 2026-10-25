@@ -1,0 +1,41 @@
+<!doctype html><html lang="en" data-look="classic" data-odyssey-mode="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Looks gallery</title>
+<link rel="stylesheet" href="../../hub/assets/odyssey.css"><link rel="stylesheet" href="looks.css"><link rel="stylesheet" href="looks-picker.css">
+<style>
+@font-face{font-family:"Hanken Grotesk";src:url(../../hub/assets/fonts/HankenGrotesk.ttf);font-weight:100 900}
+@font-face{font-family:"Baloo 2";src:url(../../hub/assets/fonts/Baloo2.ttf);font-weight:400 800}
+body{margin:0;background:#ECEEF1;font:15px/1.45 "Hanken Grotesk",sans-serif;padding:24px}
+h1{font:700 24px "Hanken Grotesk";margin:0 0 16px;color:#0F2B46}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.app{background:var(--look-canvas);color:var(--look-ink);border-radius:30px;overflow:hidden;border:1px solid var(--look-line);min-height:640px;display:flex;flex-direction:column}
+.hero{background:var(--look-hero);color:var(--look-on-hero);padding:26px 22px 30px;border-radius:0 0 var(--look-r-pocket) var(--look-r-pocket)}
+.hero small{opacity:.8}.brand{font:var(--look-display-weight) 22px var(--look-font-display);display:flex;align-items:center;gap:10px}
+.brand i{width:12px;height:12px;border-radius:50%;background:var(--look-accent)}
+.bal{font:var(--look-display-weight) 44px/1.1 var(--look-font-display);margin:18px 0 4px}
+.row{display:flex;gap:10px;margin-top:16px}
+.btn{flex:1;min-height:48px;border:0;border-radius:var(--look-r-control);font:700 15px inherit;background:var(--look-accent);color:var(--look-on-accent)}
+.btn.ghost{background:transparent;color:inherit;border:1.5px solid color-mix(in srgb,var(--look-on-hero) 50%,transparent)}
+.body{padding:18px;display:grid;gap:12px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.t{border-radius:var(--look-r-pocket);padding:14px;min-height:84px}
+.t b{font:var(--look-display-weight) 22px var(--look-font-display);display:block}
+.t1{background:var(--look-field-1)}.t2{background:var(--look-field-2)}
+.li{display:flex;align-items:center;gap:12px;background:var(--look-surface);border:1px solid var(--look-line);border-radius:var(--look-r-control);padding:12px}
+.av{width:40px;height:40px;border-radius:calc(var(--look-r-control)*.8);background:var(--look-field-3);display:grid;place-items:center;font-weight:700}
+.li span:last-child{margin-inline-start:auto;font-weight:700}
+.chip{display:inline-block;padding:3px 10px;border-radius:99px;background:var(--look-field-2);font-size:12px;font-weight:700}
+.nav{margin-top:auto;display:flex;justify-content:space-around;padding:12px;background:var(--look-surface);border-top:1px solid var(--look-line)}
+.nav b{padding:8px 16px;border-radius:var(--look-r-pill);background:var(--look-brand);color:var(--look-on-brand);font-size:13px}.nav span{padding:8px;color:var(--look-muted);font-size:13px}
+.lbl{font-size:12px;opacity:.7;padding:10px 22px 0;letter-spacing:.06em;text-transform:uppercase}
+</style></head><body><h1>Looks gallery</h1><div class="grid" id="g"></div>
+<script src="looks.js"></script><script>
+const mode=new URLSearchParams(location.search).get('mode')||'light';
+document.documentElement.dataset.odysseyMode=mode;
+document.getElementById('g').innerHTML=Looks.list.map(l=>`<div class="app" data-look="${l.id}" data-odyssey-mode="${mode}">
+<div class="hero"><div class="brand"><i></i>${l.name}</div><div class="bal">12,480.50</div><small>Available balance · ${l.tag}</small>
+<div class="row"><button class="btn">Send</button><button class="btn ghost">Request</button></div></div>
+<div class="body"><div class="tiles"><div class="t t1"><small>Spending</small><b>2,140</b></div><div class="t t2"><small>Savings</small><b>8,900</b></div></div>
+<div class="li"><div class="av">S</div><div><b>Salma Haddad</b><br><span class="chip">Completed</span></div><span>-120.00</span></div>
+<div class="li"><div class="av">A</div><div><b>Al-Noor Store</b><br><span class="chip">Pending</span></div><span>-45.50</span></div></div>
+<div class="nav"><b>Home</b><span>Cards</span><span>Pay</span><span>More</span></div></div>`).join('');
+</script></body></html>

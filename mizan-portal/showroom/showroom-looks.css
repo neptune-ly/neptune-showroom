@@ -1,0 +1,107 @@
+/* Looks bridge for the landing page. Dense family = sober authority; vivid family = colour fields, big shapes, spring motion. */
+html[data-look]{
+  --primary:var(--look-brand);--on-primary:var(--look-on-brand);
+  --hero:var(--look-hero);--on-hero:var(--look-on-hero);--hero-soft:var(--look-field-2);
+  --tone:var(--color-base-surface-container-high);--on-tone:var(--look-ink);
+  --sec-dark:var(--look-brand);--on-sec-dark:var(--look-on-brand);
+  --coral:var(--look-accent);--lemon:var(--look-accent);--ink-deep:var(--look-ink);
+  --pocket:var(--look-r-pocket);--ctl:var(--look-r-control);--display:var(--look-font-display);
+  --dur:var(--look-motion);--spring:cubic-bezier(.34,1.5,.5,1);
+}
+html[data-look=vibrant]:not([data-odyssey-mode=dark]){--hero:var(--look-field-1);--on-hero:#071A2D}
+html[data-look][data-odyssey-mode=dark]{--sec-dark:var(--color-base-surface-container-high);--on-sec-dark:var(--look-ink)}
+html[data-look][dir=rtl]{--display:"Beiruti","Hanken Grotesk",sans-serif}
+html[data-look=classic],html[data-look=heritage],html[data-look=private]{--spring:cubic-bezier(.2,.8,.25,1)}
+html[data-look] :focus-visible{outline-color:var(--look-brand)}
+html[data-look][data-odyssey-mode=dark] :focus-visible{outline-color:var(--look-accent)}
+html[data-look] h1,html[data-look] h2,html[data-look] .step-panel h3,html[data-look] .cards h3,html[data-look] .dcard h3,html[data-look] summary,html[data-look] .big-fig strong{font-weight:var(--look-display-weight)}
+html[data-look] .nav{background:color-mix(in srgb,var(--look-canvas) 90%,transparent)}
+html[data-look] .logo{color:var(--look-brand)}
+html[data-look][data-odyssey-mode=dark] .logo{color:var(--look-ink)}
+.logo .mz-lock{--mz-size:38px}
+.logo{padding-inline-end:6px}
+.hero-lock{--mz-size:52px;margin-bottom:22px;color:var(--on-hero)}
+.hero-lock .mz-by{opacity:.85}
+/* hero + chrome tokens */
+html[data-look] .tag{background:var(--look-accent);color:var(--look-on-accent)}
+html[data-look] .hero .btn.primary{background:var(--look-accent);color:var(--look-on-accent)}
+html[data-look] .hero .btn.outline{color:var(--on-hero)}
+html[data-look] .chips li{background:color-mix(in srgb,var(--on-hero) 14%,transparent);color:var(--on-hero)}
+html[data-look] .r1{stroke:var(--look-accent)}html[data-look] .r2{stroke:var(--on-hero)}html[data-look] .r3{stroke:var(--on-hero);opacity:.5}
+html[data-look] .scale line{stroke:var(--on-hero)}
+html[data-look] .scale rect,html[data-look] .scale circle,html[data-look] .scale .post{fill:var(--on-hero)}
+html[data-look] .scale .pan{fill:var(--look-accent);stroke:var(--on-hero)}
+html[data-look] .scale .pan.b{fill:var(--look-surface)}
+html[data-look] .float{background:var(--on-hero);color:var(--hero)}
+html[data-look] .f2{background:var(--look-accent);color:var(--look-on-accent)}
+html[data-look] .f3{background:var(--look-surface);color:var(--look-ink)}
+html[data-look] .fl-node.on{background:var(--hero);color:var(--on-hero)}
+html[data-look] .step-panel{background:var(--look-field-2);color:var(--look-ink)}
+html[data-look] .rail.run{border-color:var(--look-accent)}
+html[data-look] .pk.coin{background:var(--look-accent);border-color:var(--look-ink)}
+html[data-look] .sw.coinc{background:var(--look-accent);border-color:var(--look-ink)}
+html[data-look] .panel.out{background:var(--look-field-3);color:var(--look-ink)}
+html[data-look] .rows div{border-color:color-mix(in srgb,var(--look-ink) 20%,transparent)}
+html[data-look] .cards .ic{color:var(--look-accent)}
+html[data-look] .sec-dark .head p,html[data-look] .cards p{color:color-mix(in srgb,var(--on-sec-dark) 86%,transparent)}
+html[data-look] .iso>div{background:color-mix(in srgb,var(--on-sec-dark) 10%,transparent);border-color:color-mix(in srgb,var(--on-sec-dark) 38%,transparent)}
+html[data-look] .cards article{background:color-mix(in srgb,var(--on-sec-dark) 9%,transparent)}
+html[data-look] .wall{border-inline-color:var(--look-accent)}
+html[data-look] .env{background:var(--look-accent);color:var(--look-on-accent)}
+html[data-look] .d1{background:var(--look-field-1)}html[data-look] .d2{background:var(--look-field-2)}html[data-look] .d3{background:var(--look-field-3)}
+html[data-look] .d4{background:color-mix(in srgb,var(--look-brand) 16%,var(--look-surface))}
+html[data-look] .dcard{color:var(--look-ink)}
+html[data-look] .contact-card{background:var(--look-accent);color:var(--look-on-accent)}
+html[data-look] input[name]{background:var(--look-surface);color:var(--look-ink);border-color:var(--look-on-accent)}
+html[data-look] .contact .btn.primary{background:var(--look-on-accent);color:var(--look-accent)}
+html[data-look] .thanks{background:var(--look-on-accent);color:var(--look-accent)}
+html[data-look] .stp[aria-selected=true]{background:var(--look-brand);color:var(--look-on-brand)}
+html[data-look] .stp[aria-selected=true] .n{background:var(--look-on-brand);color:var(--look-brand)}
+/* motion scale */
+html[data-look] .rv .reveal{transition-duration:calc(.6s*var(--dur)),calc(.8s*var(--dur))}
+html[data-look] .btn,html[data-look] .dcard,html[data-look] .cards article,html[data-look] .fl-node,html[data-look] .stp{transition-duration:calc(.45s*var(--dur)),calc(.3s*var(--dur)),calc(.2s*var(--dur))}
+/* picker */
+.look-menu{position:relative}
+.look-menu summary{list-style:none;cursor:pointer}.look-menu summary::-webkit-details-marker{display:none}
+.look-btn .looks-dot{width:26px;height:26px;border-width:2px;display:block;background:var(--a);box-shadow:inset 0 0 0 5px var(--b)}
+.look-pop{position:absolute;inset-inline-end:0;top:calc(100% + 10px);z-index:60;width:min(330px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:var(--pocket);padding:10px;box-shadow:0 1px 3px rgba(7,26,45,.14)}
+.look-pop .looks-picker{flex-direction:column;flex-wrap:nowrap;gap:6px}.look-pop .looks-chip{width:100%;min-height:52px}.look-pop .looks-chip small{grid-column:2}
+
+/* ===== dense family ===== */
+:is([data-look=classic],[data-look=heritage],[data-look=private]) body{font-size:16px}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .hero{min-height:440px;border-radius:var(--pocket);padding:clamp(24px,4vw,52px) clamp(20px,4vw,56px)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) h1{font-size:clamp(32px,4.2vw,54px);line-height:1.08;letter-spacing:-.015em}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) h2{font-size:clamp(26px,3vw,38px)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .sec{padding-block:clamp(40px,6vw,76px)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .head p{font-size:17px}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .links a,:is([data-look=classic],[data-look=heritage],[data-look=private]) .seg,:is([data-look=classic],[data-look=heritage],[data-look=private]) .seg button{border-radius:var(--ctl)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .btn{min-height:50px;border-radius:var(--ctl)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .btn:hover{transform:none}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .tag,:is([data-look=classic],[data-look=heritage],[data-look=private]) .chips li,:is([data-look=classic],[data-look=heritage],[data-look=private]) .stp{border-radius:var(--ctl)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .icon-btn{border-radius:var(--ctl)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .icon-btn:hover{transform:none}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) :is(.fl-node,.step-panel,.panel.out,.cards article,.dcard,.sec-dark,.contact-card,.iso>div,.float,.pk,.env,details){border-radius:var(--pocket)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .sec-dark{border-radius:var(--pocket)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .fl-node.on{transform:none;box-shadow:none;outline:2px solid var(--look-accent)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .dcard{min-height:240px;border:1px solid var(--line)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .dcard:hover{transform:translateY(-2px);box-shadow:none}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .cards article:hover{transform:none}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .float,:is([data-look=classic],[data-look=heritage],[data-look=private]) .rings circle{animation:none}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .beam{animation-duration:14s}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .f1{top:4%}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .rv .reveal{transform:translateY(10px)}
+/* ===== vivid family ===== */
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .hero{border-radius:calc(var(--pocket)*2) var(--ctl) calc(var(--pocket)*2) var(--ctl)}
+[dir=rtl]:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .hero{border-radius:var(--ctl) calc(var(--pocket)*2) var(--ctl) calc(var(--pocket)*2)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .btn{border-radius:var(--look-r-pill)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .dcard{box-shadow:0 1px 3px rgba(7,26,45,.14)}
+@media (max-width:900px){.look-pop{inset-inline-end:-56px}.hero-lock{--mz-size:44px}}
+@media (max-width:640px){.logo b{display:block}.logo .mz-lock{--mz-size:32px}.logo .mz-by{display:none}.look-btn{width:44px;height:44px}.hero-lock{margin-bottom:16px}}
+.logo b.mz-word,.hero-lock b.mz-word{border:0;padding:0;font:700 calc(var(--mz-size)*.75)/1 "Hanken Grotesk",system-ui,sans-serif;letter-spacing:-.02em}
+[dir=rtl] .logo b.mz-word,[dir=rtl] .hero-lock b.mz-word{font-family:"Beiruti","Hanken Grotesk",sans-serif;font-weight:800;letter-spacing:0;line-height:1.05}
+details.look-menu,details.look-menu[open]{background:none;border:0;padding:0;border-radius:0;color:inherit}
+.look-menu summary.icon-btn{min-height:0;padding:0;display:grid;font:inherit}
+.look-menu summary::after{content:none!important}
+.look-btn .looks-dot{grid-row:auto}
+.look-menu[open] .look-btn{box-shadow:0 0 0 3px var(--look-brand)}
+@media (max-width:700px){.look-menu{position:static}.look-pop{position:fixed;top:68px;inset-inline:12px;width:auto}}

@@ -1,0 +1,58 @@
+# Builds installable test apps for the four Neptune Showroom apps.
+# Android: debug-signed APKs (installable on any phone with "install unknown apps" enabled), downloadable from the run's Artifacts.
+# iOS: unsigned simulator builds (proves the project builds); signed App Store builds need your Apple credentials (see store/README.md).
+name: Build apps
+on:
+  workflow_dispatch:
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [neptune-mobile, neptune-vega, neptune-mobile-telco, neptune-vega-telco]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - name: Stage app
+        run: node scripts/stage-app.mjs ${{ matrix.app }}
+      - name: Create Android project
+        working-directory: store/dist/${{ matrix.app }}
+        run: |
+          npm install --no-audit --no-fund
+          npx cap add android
+          mkdir -p assets && cp ../../../brand/apps/${{ matrix.app }}-1024.png assets/icon-only.png
+          npx capacitor-assets generate --android || true
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />#' $M
+          npx cap sync android
+      - name: Build debug APK
+        working-directory: store/dist/${{ matrix.app }}/android
+        run: ./gradlew --no-daemon assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-apk
+          path: store/dist/${{ matrix.app }}/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+  ios-simulator:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [neptune-mobile, neptune-vega, neptune-mobile-telco, neptune-vega-telco]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node scripts/stage-app.mjs ${{ matrix.app }}
+      - name: Create iOS project and build for simulator
+        working-directory: store/dist/${{ matrix.app }}
+        run: |
+          npm install --no-audit --no-fund
+          npx cap add ios
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'The camera is used to verify your identity in this demonstration.'" ios/App/App/Info.plist || true
+          npx cap sync ios
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build CODE_SIGNING_ALLOWED=NO build

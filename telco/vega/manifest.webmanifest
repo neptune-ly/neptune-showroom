@@ -1,0 +1,37 @@
+{
+ "name": "Sahar Cash - Neptune Vega for Telco (demo)",
+ "short_name": "Sahar Cash",
+ "description": "Demonstration: wallet-first mobile money with agents, cash-in/out and on-device Polaris onboarding. Simulated data.",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#FFF7F9",
+ "theme_color": "#2A0F1E",
+ "lang": "en",
+ "icons": [
+  {
+   "src": "icons/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icons/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icons/maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  },
+  {
+   "src": "icon.svg",
+   "sizes": "any",
+   "type": "image/svg+xml"
+  }
+ ]
+}

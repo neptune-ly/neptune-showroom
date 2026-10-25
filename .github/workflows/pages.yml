@@ -1,0 +1,35 @@
+# Deploys the static showroom to GitHub Pages. Enable Pages (Source: GitHub Actions) in the repository settings first.
+# Note: Pages sites are public even for private repositories unless the organisation is on GitHub Enterprise Cloud.
+name: Deploy showroom
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency: { group: pages, cancel-in-progress: true }
+jobs:
+  flat-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: for d in hub plus mobile vega telco shared mizan-portal; do node scripts/check-flat.mjs $d; done
+  deploy:
+    needs: flat-check
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: "${{ steps.deployment.outputs.page_url }}" }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble site
+        run: |
+          mkdir _site
+          cp index.html _site/ && cp -r site-assets shared hub plus mobile vega telco mizan-portal _site/
+          find _site -type d \( -name _shots -o -name _test -o -name test -o -name tools -o -name node_modules \) -prune -exec rm -rf {} +
+          find _site -type f \( -name '*.md' -o -name '*.map' -o -name '*.py' -o -name '*.sh' \) -not -path '*/vendor/*' -delete
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: _site }
+      - id: deployment
+        uses: actions/deploy-pages@v4

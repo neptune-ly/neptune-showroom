@@ -1,0 +1,9 @@
+import { boot } from './app.js';
+import './screens/auth.js';
+import './screens/home.js';
+import './screens/money.js';
+import './screens/cards.js';
+import './screens/services.js';
+import './screens/more.js';
+import './screens/mizan.js';
+boot();

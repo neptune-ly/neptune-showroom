@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-look="classic" data-odyssey-mode="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neptune Showroom</title>
+<meta name="description" content="Interactive demonstrations of Neptune products. Simulated data only.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="site-assets/odyssey.css"><link rel="stylesheet" href="site-assets/looks/looks.css"><link rel="stylesheet" href="site-assets/looks/looks-picker.css">
+<script src="site-assets/looks/looks.js"></script>
+<style>
+@font-face{font-family:"Hanken Grotesk";src:url(site-assets/fonts/HankenGrotesk.ttf);font-weight:100 900;font-display:swap}
+@font-face{font-family:Beiruti;src:url(site-assets/fonts/Beiruti.ttf);font-weight:200 900;font-display:swap}
+*{box-sizing:border-box}body{margin:0;background:var(--look-canvas);color:var(--look-ink);font:16px/1.5 "Hanken Grotesk",system-ui,sans-serif}
+[dir=rtl] body{font-family:Beiruti,"Hanken Grotesk",sans-serif}
+header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:20px clamp(16px,4vw,48px);border-bottom:1px solid var(--look-line)}
+header img{height:30px}header .sp{flex:1}
+main{max-width:1080px;margin:0 auto;padding:32px clamp(16px,4vw,48px) 64px}
+h1{font-size:clamp(28px,4vw,40px);line-height:1.15;margin:0 0 8px;font-weight:700}
+.lead{color:var(--look-muted);max-width:60ch;margin:0 0 28px}
+h2{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--look-muted);margin:36px 0 12px;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+a.card{display:block;text-decoration:none;color:inherit;background:var(--look-surface);border:1px solid var(--look-line);border-radius:var(--look-r-pocket);padding:18px;min-height:112px;transition:background .15s,border-color .15s}
+a.card:hover{background:var(--look-field-1);border-color:var(--look-brand)}a.card:focus-visible{outline:3px solid var(--look-brand);outline-offset:2px}
+a.card b{display:block;font-size:18px;margin-bottom:4px}a.card span{color:var(--look-muted);font-size:14px}
+.note{margin-top:40px;padding-top:16px;border-top:1px solid var(--look-line);color:var(--look-muted);font-size:13px}
+select{font:inherit;min-height:44px;padding:0 12px;border:1px solid var(--look-line);border-radius:var(--look-r-control);background:var(--look-surface);color:inherit}
+</style></head>
+<body>
+<header><img src="site-assets/Neptune_Logo_Color.png" alt="Neptune"><div class="sp"></div>
+<div id="looks"></div></header>
+<main>
+<h1 id="t">Neptune Showroom</h1><p class="lead" id="l">Interactive demonstrations for banks, fintechs and telecom operators. Everything here is simulated: no real accounts, money or customers.</p>
+<h2 id="h1">Apps (also published to the stores)</h2>
+<div class="grid">
+<a class="card" href="mobile/"><b>Neptune Mobile</b><span>Retail banking, with Mizan Pay over time</span></a>
+<a class="card" href="vega/app/"><b>Neptune Vega</b><span>Wallet, Personal and Business modes, Mizan POS</span></a>
+<a class="card" href="telco/mobile/"><b>Neptune Mobile for Telco</b><span>Telecom wallet with on-device onboarding</span></a>
+<a class="card" href="telco/vega/"><b>Neptune Vega for Telco</b><span>Mobile money with agents and cash in/out</span></a>
+</div>
+<h2 id="h2">Web products</h2>
+<div class="grid">
+<a class="card" href="hub/"><b>Nexus Hub</b><span>Bank operations console: cards, LYPay, OnePay, transfers, fraud</span></a>
+<a class="card" href="plus/"><b>Neptune Plus</b><span>Corporate banking: payments, payroll, FX, approvals</span></a>
+<a class="card" href="mizan-portal/"><b>Mizan operations portal</b><span>Murabaha financing: cases, risk, settlement</span></a>
+<a class="card" href="mizan-portal/showroom/"><b>Mizan</b><span>Product overview and how it works</span></a>
+<a class="card" href="vega/console/"><b>Vega console</b><span>Wallet operator console: KYC, limits, reconciliation</span></a>
+<a class="card" href="shared/looks/gallery.html"><b>Looks gallery</b><span>Six switchable looks, professional to vibrant</span></a>
+</div>
+<p class="note" id="n">Demonstration only. Simulated data. On-device identity checks are demo-grade and not a certified biometric system. Add <code>?look=vibrant</code> to any address to preview another look.</p>
+</main>
+<script>Looks.mount(document.getElementById('looks'),{label:'Look'});</script>
+</body></html>

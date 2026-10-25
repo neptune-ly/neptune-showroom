@@ -1,0 +1,101 @@
+/* Looks bridge: maps --look-* tokens onto portal tokens, then changes composition per look family.
+   Dense family (classic, heritage, private): flat tonal cards, squared corners, restrained motion, compact tables.
+   Vivid family (fintech, vibrant, telco): colour-field KPI tiles, large radii, spring motion. */
+html[data-look]{
+  --field:var(--look-hero);--on-field:var(--look-on-hero);--field-dim:color-mix(in srgb,var(--look-on-hero) 74%,transparent);
+  --primary:var(--look-brand);--on-primary:var(--look-on-brand);--accent:var(--look-accent);
+  --r-card:var(--look-r-pocket);--r-ctl:var(--look-r-control);--display:var(--look-font-display);
+  --dur:var(--look-motion);--spring:cubic-bezier(.34,1.4,.5,1);
+}
+html[data-look][dir=rtl]{--display:"Beiruti","Hanken Grotesk",sans-serif}
+html[data-look=classic],html[data-look=heritage],html[data-look=private]{--spring:cubic-bezier(.2,.8,.25,1)}
+/* motion scaling */
+html[data-look] .btn,html[data-look] .chip{transition:transform calc(.35s*var(--dur)) var(--spring),background calc(.2s*var(--dur)),box-shadow calc(.2s*var(--dur))}
+html[data-look] .nav a,html[data-look] .seg button,html[data-look] tr.row-link{transition-duration:calc(.2s*var(--dur))}
+html[data-look] .meter i{transition-duration:calc(.5s*var(--dur))}
+html[data-look] .drawer{animation-duration:calc(.45s*var(--dur))}
+html[data-look] .modal{animation-duration:calc(.4s*var(--dur))}
+html[data-look] .side{transition-duration:calc(.4s*var(--dur))}
+html[data-look] .nav a .cnt{background:var(--look-accent);color:var(--look-on-accent)}
+html[data-look] .brand{padding:6px 10px 10px}
+html[data-look] .brand small{margin-top:8px;padding-top:8px;border-top:1px solid color-mix(in srgb,var(--on-field) 22%,transparent)}
+html[data-look] .mz-lock-a{color:inherit;text-decoration:none;display:inline-block;border-radius:var(--r-ctl)}
+.side .mz-lock{--mz-size:38px}
+.top-mark{display:none;--mz-size:30px;color:var(--look-brand)}
+.top-mark .mz-by{display:none}
+.nep-plate{background:#fff;border-radius:var(--r-ctl);padding:10px 12px;margin-top:12px;display:flex;justify-content:center}
+.nep-plate img{display:block;height:auto;max-width:100%}
+/* picker */
+.look-menu{position:relative}
+.look-menu summary{list-style:none;cursor:pointer;gap:10px}
+.look-menu summary::-webkit-details-marker{display:none}
+.look-menu .looks-dot{width:22px;height:22px;border-width:1.5px;display:inline-block;background:var(--a);box-shadow:inset 0 0 0 5px var(--b)}
+.look-pop{position:absolute;inset-inline-end:0;top:calc(100% + 8px);z-index:40;width:min(340px,calc(100vw - 28px));background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:10px;box-shadow:0 1px 3px rgba(7,26,45,.14)}
+.look-pop .looks-picker{flex-direction:column;gap:6px;flex-wrap:nowrap}
+.look-pop .looks-chip{width:100%;min-height:52px;border-width:1px}
+.look-pop .looks-chip small{grid-column:2}
+@media (max-width:900px){.top-mark{display:inline-flex}.look-pop{inset-inline-end:auto;inset-inline-start:0}}
+@media (max-width:640px){.look-menu .look-cur{display:none}.look-menu summary{padding:0 12px}.topbar .top-mark{order:-2}.topbar .menu-btn{order:-3}.look-pop{inset-inline-start:auto;inset-inline-end:-60px}}
+
+/* ===== dense family ===== */
+html[data-look=classic],html[data-look=heritage],html[data-look=private]{--lk-rule:var(--look-accent)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .page{padding-top:18px}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .grid{gap:12px}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .card{padding:14px 16px;box-shadow:none}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) h1.title{font-size:clamp(22px,2.4vw,28px);font-weight:var(--look-display-weight)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .card-h h2,:is([data-look=classic],[data-look=heritage],[data-look=private]) .card>h2{font-size:15px;font-weight:var(--look-display-weight)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .page-h{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) td{padding:8px 12px}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) th{padding:9px 12px}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) table{font-size:13.5px}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .btn{min-height:42px;padding:0 16px;font-weight:600}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .btn:hover{transform:none}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .nav a{min-height:40px}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .badge{border-radius:var(--r-ctl);padding:2px 8px}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .chip{border-radius:var(--r-ctl)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .seg button[aria-pressed=true],:is([data-look=classic],[data-look=heritage],[data-look=private]) .chip[aria-pressed=true]{box-shadow:inset 0 -3px 0 var(--look-accent)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .field-band{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-top:3px solid var(--lk-rule);padding:14px 20px;gap:0;border-radius:var(--r-card)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .field-band>div{padding-inline:20px;min-width:0}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .field-band>div:first-child{padding-inline-start:0}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .field-band>div+div{border-inline-start:1px solid var(--line)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .field-band .k,:is([data-look=classic],[data-look=heritage],[data-look=private]) .field-band .d{color:var(--muted)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .field-band .v{font-size:clamp(22px,2.3vw,30px);font-weight:var(--look-display-weight);color:var(--ink)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .field-band .meter{background:var(--soft2)!important}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .field-band .meter i{background:var(--primary)!important}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .kpi .v{font-size:24px;font-weight:var(--look-display-weight)}
+:is([data-look=classic],[data-look=heritage],[data-look=private]) .case-h{padding:12px 16px}
+@media (max-width:1100px){:is([data-look=classic],[data-look=heritage],[data-look=private]) .field-band{gap:14px}:is([data-look=classic],[data-look=heritage],[data-look=private]) .field-band>div,:is([data-look=classic],[data-look=heritage],[data-look=private]) .field-band>div:first-child{padding-inline:0;border:0}}
+
+/* ===== vivid family ===== */
+html[data-look] .field-band .up,html[data-look] .field-band .dn{font-weight:700}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band{background:transparent;color:var(--ink);padding:0;gap:12px;border-radius:0;overflow:visible}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band>div{border-radius:var(--r-card);padding:20px 22px;min-width:0;transition:transform calc(.45s*var(--dur)) var(--spring)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band>div:hover{transform:translateY(-4px) rotate(-.4deg)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band>div:nth-child(4n+1){background:var(--look-hero);color:var(--look-on-hero)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band>div:nth-child(4n+2){background:var(--look-field-1);color:var(--look-ink)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band>div:nth-child(4n+3){background:var(--look-field-2);color:var(--look-ink)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band>div:nth-child(4n){background:var(--look-field-3);color:var(--look-ink)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band .k,:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band .d{color:inherit;opacity:.82}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band .v{font-weight:var(--look-display-weight)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band>div:nth-child(4n+1) .up{color:inherit}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band>div:nth-child(4n+1) .dn{color:inherit}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band .up{color:var(--ok)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band .dn{color:var(--bad)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band .meter{background:color-mix(in srgb,var(--look-ink) 15%,transparent)!important}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .field-band .meter i{background:var(--primary)!important}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .card.kpi{border:0}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .grid>.card.kpi:nth-child(3n+1){background:var(--look-field-1)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .grid>.card.kpi:nth-child(3n+2){background:var(--look-field-2)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .grid>.card.kpi:nth-child(3n){background:var(--look-field-3)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .card.kpi .k,:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .card.kpi .d{color:color-mix(in srgb,var(--look-ink) 78%,transparent)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) h1.title{font-weight:var(--look-display-weight);font-size:clamp(28px,3.6vw,42px)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .card-h h2,:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .card>h2{font-weight:var(--look-display-weight);font-size:19px}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .card{padding:22px}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .btn{border-radius:var(--look-r-pill);font-weight:700}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .btn:hover{transform:translateY(-2px)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .nav a[aria-current=page]{border-radius:var(--look-r-pill)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .steps a{border-radius:var(--look-r-pill)}
+:is([data-look=fintech],[data-look=vibrant],[data-look=telco]) .nav a:hover{transform:translateX(3px)}
+html{overflow-x:clip}.shell{overflow-x:clip}
+@media (max-width:900px){.side:not(.open){visibility:hidden}.side{transition-property:transform,visibility}}
+@media (max-width:700px){.look-menu{position:static}.topbar{position:sticky}.look-pop{position:fixed;top:auto;inset-inline:12px;width:auto;margin-top:8px}}
