@@ -55,4 +55,4 @@ jobs:
           npx cap add ios
           /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'The camera is used to verify your identity in this demonstration.'" ios/App/App/Info.plist || true
           npx cap sync ios
-          xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
