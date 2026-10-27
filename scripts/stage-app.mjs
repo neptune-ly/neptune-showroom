@@ -22,7 +22,7 @@ for (const app of cfg.apps) {
   writeFileSync(join(out, 'capacitor.config.json'), JSON.stringify({
     appId: app.bundleId, appName: app.name, webDir: 'www',
     server: { androidScheme: 'https', iosScheme: 'https' },
-    ios: { contentInset: 'always' }, android: { allowMixedContent: false }
+    ios: { contentInset: 'always' }, android: { allowMixedContent: false, adjustMarginsForEdgeToEdge: 'force' }
   }, null, 2));
   writeFileSync(join(out, 'package.json'), JSON.stringify({
     name: app.id, private: true, version: '0.1.0',
