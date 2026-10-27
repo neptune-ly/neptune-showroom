@@ -26,6 +26,7 @@ jobs:
           npx cap add android
           mkdir -p assets && cp ../../../brand/apps/${{ matrix.app }}-1024.png assets/icon-only.png
           npx capacitor-assets generate --android || true
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26
           M=android/app/src/main/AndroidManifest.xml
           sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />#' $M
           npx cap sync android
