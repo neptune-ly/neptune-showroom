@@ -1,4 +1,4 @@
-// Invented seed data. Demonstration — simulated data. All names, numbers and codes are fictional.
+// Seed data. All names, numbers and codes are fictional.
 import { add, dayOff, st } from '../assets/core.js';
 
 export const ME = { en: 'Amira Haddad', ar: 'أميرة حداد', first: { en: 'Amira', fr: 'Amira', ar: 'أميرة' }, phone: '+000 91 555 0142', handle: '@amira.h', tier: 1 };
@@ -107,6 +107,15 @@ export const S = {
   kyc: { tier: 1 },
   month: [310, 280, 355, 420, 390, 465, 410, 520, 480, 430, 395, 450]
 };
+/* wallets shown as the swipeable card stack on Home */
+export const WALLETS = [
+  { id: 'main', tone: 'coral', cur: 'LYD', name: { en: 'Main wallet', fr: 'Portefeuille principal', ar: 'المحفظة الرئيسية' }, no: '0142' },
+  { id: 'save', tone: 'teal', cur: 'LYD', name: { en: 'Savings pot', fr: 'Cagnotte épargne', ar: 'حصّالة الادخار' }, no: '0377' },
+  { id: 'usd', tone: 'navy', cur: 'USD', name: { en: 'USD wallet', fr: 'Portefeuille USD', ar: 'محفظة الدولار' }, no: '0518' },
+  { id: 'card', tone: 'sand', cur: 'LYD', name: { en: 'Vega Card', fr: 'Carte Vega', ar: 'بطاقة فيغا' }, no: '8830', card: 1 }
+];
+export const walBal = w => w.id === 'main' || w.id === 'card' ? S.balance : w.id === 'save' ? S.pockets.reduce((a, p) => a + p.saved, 0) : S.usd;
+export const RATE_USD = 4.86;
 export const person = id => CONTACTS.find(c => c.id === id);
 export const merchant = id => MERCH.find(c => c.id === id);
 export const agent = id => AGENTS.find(c => c.id === id);

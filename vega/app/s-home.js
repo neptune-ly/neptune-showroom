@@ -1,9 +1,12 @@
 // Home, activity, transaction detail + dispute, notifications badge.
-import { tenantName, st, t, add, ic, esc, money, moneyT, num, numT, countUp, spark, bars, ring, dayLabel, fmtDate, fmtTime, qrSvg } from '../assets/core.js';
-import { reg, hdr, scr, row, sectionHead, avatar, nm, store, go, tab, sheet, closeSheet, toast, $, $$, wait, refresh, rerender } from './kit.js';
+import { st, t, add, ic, esc, money, moneyT, numT, dayLabel, fmtDate, fmtTime } from '../assets/core.js';
+import { qrV as qrSvg } from './brand.js';
+import { catGlyph, CAT_TONE, TYPE_TONE } from './glyphs.js';
+import { reg, hdr, scr, row, avatar, nm, go, sheet, closeSheet, toast, $, $$, wait, refresh, rerender } from './kit.js';
 import { S, ME, whoName, person, merchant, NOTIFS } from './data.js';
 
 add({
+  rc_verify: 'Scan to verify this receipt§Scannez pour vérifier ce reçu§امسح للتحقق من هذا الإيصال',
   greet: 'Good morning§Bonjour§صباح الخير', bal: 'Total balance§Solde total§الرصيد الكلي', avail: 'Available§Disponible§المتاح', pend: 'Pending§En cours§معلّق', dlim: 'Daily limit left§Limite du jour§المتبقي من الحد اليومي',
   this_month: 'this month§ce mois§هذا الشهر', tier1: 'Tier 1 · Standard§Niveau 1 · Standard§المستوى 1 · قياسي', verified: 'Verified§Vérifié§موثّق',
   a_send: 'Send§Envoyer§إرسال', a_request: 'Request§Demander§طلب', a_pay: 'Pay§Payer§ادفع', a_cashin: 'Cash in§Dépôt§إيداع', a_cashout: 'Cash out§Retrait§سحب', a_bills: 'Bills§Factures§فواتير', a_airtime: 'Airtime§Recharge§شحن', a_more: 'More§Plus§المزيد',
@@ -27,72 +30,22 @@ export const TYPE = {
   send: ['send', 'ty_send'], receive: ['receive', 'ty_receive'], pay: ['shopping-bag', 'ty_pay'], cashin: ['cash-stack', 'ty_cashin'], cashout: ['atm', 'ty_cashout'], bill: ['bill', 'ty_bill'],
   airtime: ['phone', 'ty_airtime'], cashback: ['star', 'ty_cashback'], exchange: ['swap-exchange', 'ty_exchange'], voucher: ['card-add', 'ty_voucher'], topup: ['plus', 'ty_topup']
 };
-export const txnTitle = x => x.who ? whoName(x.who) : (x.type === 'cashback' ? t('t_cashback') : t('t_exchange'));
+export const txnTitle = x => x.who ? whoName(x.who) : x.type === 'voucher' ? x.note : (x.type === 'cashback' ? t('t_cashback') : t('t_exchange'));
+const txnTone = x => TYPE_TONE[x.type === 'pay' ? 'x' : x.type] || CAT_TONE[x.cat] || 'sand';
+export const txnGlyph = x => (x.type === 'pay' || x.type === 'bill') ? catGlyph(x.type === 'bill' ? 'bills' : x.cat) : ic(TYPE[x.type]?.[0] || 'wallet');
 export function txnRow(x, i = 0) {
-  const [icn, lk] = TYPE[x.type] || ['wallet', 'ty_pay'];
-  const lead = x.type === 'send' || x.type === 'receive' ? avatar(whoName(x.who), +String(x.who).slice(1)) : `<span class="lead f${(i % 3) + 1}">${ic(icn)}</span>`;
+  const lk = TYPE[x.type]?.[1] || 'ty_pay';
+  const lead = x.type === 'send' || x.type === 'receive' ? avatar(whoName(x.who), +String(x.who).slice(1) - 1) : `<span class="tg tone-${txnTone(x)}">${txnGlyph(x)}</span>`;
   const stl = x.status === 'pending' ? `<span class="badge warn">${t('pending')}</span>` : x.status === 'failed' ? `<span class="badge bad">${t('failed')}</span>` : '';
-  return row({
-    lead, title: esc(txnTitle(x)), sub: `${t(lk)} · <span class="num">${fmtTime(x.date)}</span>`, go: 'txn', p: { id: x.id },
-    end: `<span class="b ${x.amt > 0 ? 'pos' : ''}" ${x.status === 'failed' ? 'style="text-decoration:line-through;opacity:.6"' : ''}>${money(x.amt, { sign: true, nocur: true })}</span><br>${stl || `<span class="tiny muted">${st.cur}</span>`}`
-  });
+  return `<button class="tx" data-go="txn" data-p='{"id":${x.id}}'>${lead}<span class="tx-m"><b>${esc(txnTitle(x))}</b><small>${t(lk)} · <span class="num">${fmtTime(x.date)}</span></small></span>
+    <span class="tx-a"><b class="${x.amt > 0 ? 'pos' : ''}" ${x.status === 'failed' ? 'style="text-decoration:line-through;opacity:.55"' : ''}>${money(x.amt, { sign: true, nocur: true })}</b>${stl || `<small>${st.cur}</small>`}</span></button>`;
 }
 export function grouped(txns) {
-  const g = []; let last = '';
-  txns.forEach((x, i) => { const k = dayLabel(x.date); if (k !== last) { g.push(`<div class="grp muted small b">${k}</div>`); last = k; g.push('<div class="list" data-sk>'); } g.push(txnRow(x, i)); const nx = txns[i + 1]; if (!nx || dayLabel(nx.date) !== k) g.push('</div>'); });
-  return g.join('');
+  const days = [];
+  txns.forEach(x => { const k = dayLabel(x.date), d = days[days.length - 1]; if (d && d.k === k) d.l.push(x); else days.push({ k, l: [x] }); });
+  return days.map(d => `<div class="dh"><span>${d.k}</span><span class="num">${moneyT(d.l.reduce((a, x) => a + x.amt, 0), { sign: true })}</span></div><div class="txl" data-sk>${d.l.map((x, i) => txnRow(x, i)).join('')}</div>`).join('');
 }
 const unread = () => NOTIFS.filter(n => n.unread).length;
-const bell = () => `<button class="iconbtn" data-go="notifs" aria-label="${t('notifs')}">${ic('bell')}${unread() ? '<span class="dot"></span>' : ''}</button>`;
-const tenant = () => tenantName();
-
-const ACTIONS = [['send', 'send', 'a_send'], ['request', 'request', 'a_request'], ['scan', 'qr-code', 'a_pay'], ['cashin', 'cash-stack', 'a_cashin'], ['cashout', 'atm', 'a_cashout'], ['bills', 'bill', 'a_bills'], ['airtime', 'phone', 'a_airtime'], ['services', 'menu', 'a_more']];
-const actions = () => `<div class="acts">${ACTIONS.map(([g, i, k], n) => `<button class="act a${n % 4}" data-go="${g}" style="--n:${n}"><span class="act-ic">${ic(i)}</span><span class="act-l">${t(k)}</span></button>`).join('')}</div>`;
-
-reg('home', {
-  tab: true,
-  render() {
-    const hide = store.hideBal, bal = S.balance / 100;
-    const balHtml = hide ? `<span class="num">••••••</span>` : `<span class="num" data-count="${bal}" data-dec="2">0.00</span>`;
-    const eye = `<button class="iconbtn" data-act="eye" aria-label="${t('hide_bal')}" aria-pressed="${hide}">${ic(hide ? 'eye-off' : 'eye')}</button>`;
-    const trend = S.month.slice(-12);
-    return `<div class="body home">
-    <div class="v-sober">
-      <section class="balband" data-sk>
-        <div class="row" style="justify-content:space-between"><span class="tn">${esc(tenant())}</span><span class="row" style="gap:0">${eye}${bell()}</span></div>
-        <div class="muted-on">${t('bal')}</div>
-        <div class="bigbal disp">${balHtml}<span class="cur">${st.cur}</span></div>
-        <div class="bal-meta"><div><small>${t('avail')}</small><b>${money(S.balance - S.pending, { nocur: true })}</b></div><div><small>${t('pend')}</small><b>${money(S.pending, { nocur: true })}</b></div><div><small>${t('dlim')}</small><b>${money(2150000, { nocur: true, dec: 0 })}</b></div></div>
-      </section>
-    </div>
-    <div class="v-lively">
-      <div class="hhead rise">${avatar(nm(ME), 0, 'big')}<div class="sp"><div class="small muted">${t('greet')}</div><div class="disp" style="font-size:22px;line-height:1.1">${nm(ME.first)}</div></div>${eye}${bell()}</div>
-      <section class="balcard rise" data-sk>
-        <svg class="blob" viewBox="0 0 200 200" aria-hidden="true"><circle cx="165" cy="30" r="64" fill="var(--look-accent)" opacity=".9"/><circle cx="196" cy="118" r="36" fill="var(--look-field-2)" opacity=".9"/><circle cx="130" cy="-8" r="26" fill="var(--look-field-3)"/></svg>
-        <div class="row"><span class="badge brand tier">${ic('security-shield', 'sm')} ${t('tier1')}</span></div>
-        <div class="muted-on" style="margin-top:14px">${t('bal')}</div>
-        <div class="bigbal disp">${balHtml}<span class="cur">${st.cur}</span></div>
-        <div class="row" style="gap:8px;margin-top:6px"><span class="chip-trend">${ic('trending-up', 'sm')} <span class="num">+12.4%</span> ${t('this_month')}</span></div>
-        <div class="spk">${spark(trend, { w: 330, h: 54, color: 'currentColor' })}</div>
-      </section>
-    </div>
-    <section class="rise" data-sk>${actions()}</section>
-    <section class="promos rise" aria-label="Offers">
-      <button class="promo p1" data-go="kyc"><span class="pm-t">${t('p_kyc_t')}</span><span class="pm-s">${t('p_kyc_s')}</span>${ring(50, { size: 64, thick: 8, color: 'currentColor', inner: '<span class="num">2/4</span>' })}</button>
-      <button class="promo p2" data-go="rewards"><span class="pm-t">${t('p_cb_t')}</span><span class="pm-s">${t('p_cb_s')}</span><span class="pm-ic">${ic('star', 'xl')}</span></button>
-      <button class="promo p3" data-go="referrals"><span class="pm-t">${t('p_ref_t')}</span><span class="pm-s">${t('p_ref_s')}</span><span class="pm-ic">${ic('users', 'xl')}</span></button>
-    </section>
-    <section class="stack s8 rise">${sectionHead(t('my_pockets'), `<button data-tab="pockets">${t('see_all')}</button>`)}
-      <div class="pstrip">${S.pockets.map((p, i) => `<button class="pk f${p.f}" data-go="pocket" data-p='{"id":"${p.id}"}' data-sk>${ring(p.saved / p.goal * 100, { size: 58, thick: 7, color: 'currentColor', inner: ic(p.icon, 'sm') })}<span class="pk-n">${nm(p.name)}</span><span class="pk-a">${money(p.saved, { dec: 0 })}</span></button>`).join('')}</div></section>
-    <section class="stack s8 rise">${sectionHead(t('recent'), `<button data-tab="activity">${t('see_all')}</button>`)}
-      <div class="list" data-sk>${S.txns.slice(0, 5).map((x, i) => txnRow(x, i)).join('')}</div></section>
-    <section class="card rise" data-sk><div class="small muted b">${t('spend_trend')}</div><div style="margin-top:8px">${bars(S.month.slice(-12).map(v => v * 100), ['', '', '', '', '', '', '', '', '', '', '', ''], { h: 90, hi: 7 })}</div></section>
-    </div>`;
-  },
-  mount(el) {
-    el.addEventListener('click', e => { if (e.target.closest('[data-act=eye]')) { store.hideBal = !store.hideBal; refresh(); } });
-  }
-});
 
 reg('activity', {
   tab: true,
@@ -102,7 +55,7 @@ reg('activity', {
     const list = S.txns.filter(keep).filter(x => !qv || (txnTitle(x) + x.ref).toLowerCase().includes(qv.toLowerCase()));
     const inn = S.txns.filter(x => x.amt > 0).reduce((a, x) => a + x.amt, 0), out = S.txns.filter(x => x.amt < 0).reduce((a, x) => a + x.amt, 0);
     return `${hdr(t('act_title'), { back: false, right: `<button class="iconbtn" data-go="statements" aria-label="${t('s_title')}">${ic('statement')}</button>` })}<div class="body">
-      <div class="grid2 rise"><div class="card tonal sum" data-sk><span class="small">${t('in_m')}</span><b class="disp pos2">${money(inn, { sign: true })}</b></div><div class="card sum" data-sk><span class="small muted">${t('out_m')}</span><b class="disp">${money(out)}</b></div></div>
+      <div class="grid2 rise"><div class="sumc in" data-sk>${ic('receive', 'sm')}<span class="small">${t('in_m')}</span><b class="disp">${money(inn, { sign: true, nocur: true })}</b></div><div class="sumc out" data-sk>${ic('send', 'sm')}<span class="small">${t('out_m')}</span><b class="disp">${money(out, { nocur: true })}</b></div></div>
       <label class="searchbar rise">${ic('search', 'sm')}<input class="sinp" type="search" placeholder="${t('act_search')}" value="${esc(qv)}" aria-label="${t('search')}"></label>
       <div class="chips rise">${[['all', 'f_all'], ['sent', 'f_sent'], ['recv', 'f_recv'], ['pay', 'f_pay'], ['cash', 'f_cash']].map(([k, l]) => `<button class="chip" aria-pressed="${f === k}" data-f="${k}">${t(l)}</button>`).join('')}</div>
       ${list.length ? grouped(list) : `<p class="muted center" style="padding:30px 0">${t('none_found')}</p>`}</div>`;
@@ -119,10 +72,10 @@ const instant = el => $$('.rise', el).forEach(x => { x.style.animation = 'none';
 const STEPS = x => x.status === 'failed' ? [['tl_created', 1], ['tl_failed', 0, 'bad']] : x.status === 'pending' ? [['tl_created', 1], ['tl_checked', 1], ['tl_wait', 0, 'warn']] : [['tl_created', 1], ['tl_checked', 1], ['tl_settled', 1]];
 reg('txn', {
   render({ id }) {
-    const x = S.txns.find(y => y.id === id) || S.txns[0]; const [icn, lk] = TYPE[x.type];
+    const x = S.txns.find(y => y.id === id) || S.txns[0]; const lk = TYPE[x.type][1];
     const sb = x.status === 'done' ? `<span class="badge ok">${ic('success-check', 'sm')} ${t('completed')}</span>` : x.status === 'pending' ? `<span class="badge warn">${t('pending')}</span>` : `<span class="badge bad">${t('failed')}</span>`;
     const out = x.amt < 0;
-    return scr(`<div class="rcpt rise"><div class="rc-top">${x.who && (x.type === 'send' || x.type === 'receive') ? avatar(whoName(x.who), +String(x.who).slice(1), 'big') : `<span class="lead big f1">${ic(icn, 'lg')}</span>`}
+    return scr(`<div class="rcpt rise"><div class="rc-top">${x.who && (x.type === 'send' || x.type === 'receive') ? avatar(whoName(x.who), +String(x.who).slice(1) - 1, 'big') : `<span class="tg big tone-${txnTone(x)}">${txnGlyph(x)}</span>`}
       <div class="small muted" style="margin-top:8px">${t(lk)}</div><div class="disp" style="font-size:20px">${esc(txnTitle(x))}</div>
       <div class="disp rc-amt ${x.amt > 0 ? 'pos' : ''}">${money(x.amt, { sign: true })}</div>${sb}</div>
       <div class="rc-cut"><i></i><b></b><i></i></div>
@@ -133,7 +86,7 @@ reg('txn', {
       ${x.note ? kv(t('td_note'), esc(x.note)) : ''}
       ${kv(t('fee'), x.type === 'cashout' ? money(150) : t('free'))}
       ${kv(t('ref'), `<button class="refbtn mono" data-copy="${x.ref}">${x.ref} ${ic('copy', 'sm')}</button>`)}</div>
-      <div class="rc-qr">${qrSvg(x.ref, { size: 74, n: 21, logo: false })}<span class="tiny muted">${t('demo_label')}</span></div></div>
+      <div class="rc-qr">${qrSvg(x.ref, { size: 74, n: 21, logo: false })}<span class="tiny muted">${t('rc_verify')}</span></div></div>
       <div class="card rise"><div class="small b" style="margin-bottom:10px">${t('td_details')}</div><div class="tl">${STEPS(x).map(([k, on, c]) => `<div class="tl-s ${on ? 'on' : ''} ${c || ''}"><i></i><span>${t(k)}</span></div>`).join('')}</div></div>`,
       { head: hdr(t('receipt'), { right: `<button class="iconbtn" data-act="share" aria-label="${t('share')}">${ic('share')}</button>` }), foot: `<div class="grid2"><button class="btn tonal" data-act="report">${ic('dispute', 'sm')} ${t('td_report')}</button>${['send', 'pay', 'bill'].includes(x.type) ? `<button class="btn" data-act="repeat">${ic('refresh', 'sm')} ${t('td_repeat')}</button>` : `<button class="btn" data-act="share">${ic('share', 'sm')} ${t('share')}</button>`}</div>` });
   },

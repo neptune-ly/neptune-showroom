@@ -1,4 +1,4 @@
-// Shared helpers: state, i18n, formatting, motion, sheets, charts, QR. Demonstration — simulated data.
+// Shared helpers: state, i18n, formatting, motion, sheets, charts, QR.
 export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 export const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -16,7 +16,7 @@ export const S = {
   get(k) { return ls.g('nm.' + k) }, set(k, v) { ls.s('nm.' + k, v) }
 };
 export const reduced = () => matchMedia('(prefers-reduced-motion:reduce)').matches && !q.get('motion');
-export const kind = () => (window.Looks && ['classic', 'heritage', 'private'].includes(Looks.get())) ? 'sober' : 'lively';
+export const kind = () => 'lively';
 
 /* ---------- i18n: English text is the key; rows are [en, fr, ar] ---------- */
 const DICT = { fr: {}, ar: {} }; export const MISSING = new Set();
@@ -58,7 +58,7 @@ export const init = (name) => { const p = name.trim().split(/\s+/); return (p[0]
 
 /* ---------- motion ---------- */
 export function haptic(ms = 8) { try { if (navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate(ms) } catch (e) {} }
-export const EASE_SPRING = () => kind() === 'lively' ? 'linear(0,.009,.035 2.1%,.141 4.4%,.723 12.9%,.938 16.7%,1.017 19.4%,1.077 22.4%,1.121 25.7%,1.149 29.2%,1.159 33.4%,1.133 39.5%,1.056 49.4%,1.011 57.9%,.993 66%,.99 74.2%,1.001 87.4%,1)' : 'linear(0,.12 6%,.5 14%,.83 24%,1.03 36%,1.04 46%,1.01 60%,1)';
+export const EASE_SPRING = () => 'linear(0,.009,.035 2.1%,.141 4.4%,.723 12.9%,.938 16.7%,1.017 19.4%,1.077 22.4%,1.121 25.7%,1.149 29.2%,1.159 33.4%,1.133 39.5%,1.056 49.4%,1.011 57.9%,.993 66%,.99 74.2%,1.001 87.4%,1)';
 export function anim(el, kf, o = {}) { if (reduced()) { const last = kf[kf.length - 1]; Object.assign(el.style, last); return { finished: Promise.resolve() } } return el.animate(kf, { duration: 520, easing: EASE_SPRING(), fill: 'both', ...o }) }
 export function countUp(el, dur = 800) {
   const to = parseFloat(el.dataset.count); if (isNaN(to) || !el.querySelector('.i')) return;
@@ -142,4 +142,4 @@ export function qrSvg(seed = 'x', n = 29, px = 8) {
   return `<svg viewBox="0 0 ${n} ${n}" width="${n * px}" height="${n * px}" fill="currentColor" shape-rendering="geometricPrecision" aria-label="QR">${r}</svg>`;
 }
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
-export function logo(rev) { return `<img src="assets/brand/Neptune_Logo_${rev ? 'Reverse' : 'Color'}.png" alt="Neptune" class="nlogo">` }
+export const bmark = (rev = true) => `<img class="bmark" src="assets/brand/neptune-mark${rev ? '-reverse' : ''}.svg" alt="Neptune">`;

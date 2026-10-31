@@ -3,6 +3,7 @@ import './screens/auth.js';
 import './screens/home.js';
 import './screens/money.js';
 import './screens/cards.js';
+import './screens/vouchers.js';
 import './screens/services.js';
 import './screens/more.js';
 import './screens/mizan.js';

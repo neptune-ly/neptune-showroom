@@ -28,6 +28,9 @@ s=s.replace("    buildTypes {","    signingConfigs {\n        release {\n       
 s=s.replace("        release {\n            minifyEnabled false","        release {\n            signingConfig signingConfigs.release\n            minifyEnabled false",1)
 open(p,'w').write(s)
 P
+sed -i '' 's/minSdkVersion = 23/minSdkVersion = 24/' android/variables.gradle
+sed -i '' 's/compileSdkVersion = 35/compileSdkVersion = 36/;s/targetSdkVersion = 35/targetSdkVersion = 36/' android/variables.gradle
+echo 'android.suppressUnsupportedCompileSdk=36' >> android/gradle.properties
 npx cap sync android >/dev/null
 cd android && NEP_KS="$KS" NEP_PW="$PW" NEP_ALIAS="$ALIAS" ./gradlew --no-daemon bundleRelease -q
 ls -lh app/build/outputs/bundle/release/app-release.aab

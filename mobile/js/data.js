@@ -1,9 +1,9 @@
-// Invented demo data. Demonstration — simulated data.
+// Fictional sample data: invented names, balances and transactions.
 import { T, tx, dAgo, S } from './util.js';
 export const USER = { en: 'Layla Haddad', ar: 'ليلى حداد', first: ['Layla', 'Layla', 'ليلى'], id: '30417' };
 export const uname = () => T(USER.en, USER.en, USER.ar);
-export const BANKS = { classic: ['Meridian Bank', 'Meridian Bank', 'بنك ميريديان'], heritage: ['Cedar Trust', 'Cedar Trust', 'سيدار ترست'], fintech: ['Orbit', 'Orbit', 'أوربت'], vibrant: ['Neptune Spark', 'Neptune Spark', 'نبتون سبارك'], telco: ['Pulse', 'Pulse', 'بالس'], private: ['Obsidian Private', 'Obsidian Private', 'أوبسيديان برايفت'] };
-export const bankName = () => tx(BANKS[window.Looks ? Looks.get() : 'classic']);
+export const BANK = ['Neptune', 'Neptune', 'نبتون'];
+export const bankName = () => tx(BANK);
 
 export const ACC = [
   { id: 'cur', name: ['Current account', 'Compte courant', 'الحساب الجاري'], no: '4821', iban: 'LY83 0021 0004 0000 4821 77', cur: 'LYD', bal: 12480.25, ic: 'wallet', tone: '' },
@@ -17,21 +17,21 @@ export const TOTAL_LYD = () => ACC.filter(a => a.cur === 'LYD').reduce((s, a) =>
 export const BEN = [
   { id: 'b1', en: 'Omar Mansour', ar: 'عمر منصور', bank: ['Cedar Trust', 'Cedar Trust', 'سيدار ترست'], no: '3302', tone: 'f1', fav: 1 },
   { id: 'b2', en: 'Salma Farouk', ar: 'سلمى فاروق', bank: ['Orbit', 'Orbit', 'أوربت'], no: '9015', tone: 'f2', fav: 1 },
-  { id: 'b3', en: 'Youssef Karam', ar: 'يوسف كرم', bank: ['Meridian Bank', 'Meridian Bank', 'بنك ميريديان'], no: '5521', tone: 'f3', fav: 1 },
+  { id: 'b3', en: 'Youssef Karam', ar: 'يوسف كرم', bank: ['Harbor Bank', 'Harbor Bank', 'بنك هاربر'], no: '5521', tone: 'f3', fav: 1 },
   { id: 'b4', en: 'Nadia Idris', ar: 'نادية إدريس', bank: ['Pulse', 'Pulse', 'بالس'], no: '2284', tone: 'f1', fav: 0 },
-  { id: 'b5', en: 'Karim & Sons Trading', ar: 'كريم وأولاده للتجارة', bank: ['Neptune Spark', 'Neptune Spark', 'نبتون سبارك'], no: '7719', tone: 'f2', fav: 0 },
+  { id: 'b5', en: 'Karim & Sons Trading', ar: 'كريم وأولاده للتجارة', bank: ['Neptune', 'Neptune', 'نبتون'], no: '7719', tone: 'f2', fav: 0 },
   { id: 'b6', en: 'Hana Rashid', ar: 'هناء رشيد', bank: ['Cedar Trust', 'Cedar Trust', 'سيدار ترست'], no: '6140', tone: 'f3', fav: 0 },
 ];
 export const benName = b => T(b.en, b.en, b.ar);
 
 export const CATS = {
-  food: { n: ['Food & dining', 'Restauration', 'مطاعم وطعام'], c: 'var(--look-brand)', ic: 'shopping-bag' },
-  shop: { n: ['Shopping', 'Achats', 'تسوق'], c: 'var(--look-accent)', ic: 'category-tag' },
-  bills: { n: ['Bills & utilities', 'Factures', 'فواتير وخدمات'], c: '#3BC1EE', ic: 'bill' },
-  trans: { n: ['Transport', 'Transport', 'مواصلات'], c: '#8F7BE8', ic: 'location' },
-  fun: { n: ['Leisure', 'Loisirs', 'ترفيه'], c: '#41B983', ic: 'star' },
-  inc: { n: ['Income', 'Revenus', 'دخل'], c: 'var(--ok)', ic: 'trending-up' },
-  tr: { n: ['Transfers', 'Virements', 'تحويلات'], c: '#7A8CA3', ic: 'transfer' },
+  food: { n: ['Food & dining', 'Restauration', 'مطاعم وطعام'], c: '#EB4E4D', ic: 'shopping-bag' },
+  shop: { n: ['Shopping', 'Achats', 'تسوق'], c: '#E39A2D', ic: 'category-tag' },
+  bills: { n: ['Bills & utilities', 'Factures', 'فواتير وخدمات'], c: '#2AA6DA', ic: 'bill' },
+  trans: { n: ['Transport', 'Transport', 'مواصلات'], c: '#00A8AE', ic: 'location' },
+  fun: { n: ['Leisure', 'Loisirs', 'ترفيه'], c: '#D9569E', ic: 'star' },
+  inc: { n: ['Income', 'Revenus', 'دخل'], c: '#1E9E6A', ic: 'arrow-down' },
+  tr: { n: ['Transfers', 'Virements', 'تحويلات'], c: '#5B7391', ic: 'transfer' },
 };
 // d: days ago, h hour, a signed amount LYD
 const raw = [

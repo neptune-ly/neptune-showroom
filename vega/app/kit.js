@@ -1,5 +1,6 @@
 // App kit: store, router (stack + tabs), sheets, toast, PIN step-up, keypad, success screen.
-import { st, t, add, esc, ic, money, moneyT, numT, RM, runCounts, confetti, qrSvg, vegaLockup } from '../assets/core.js';
+import { st, t, add, esc, ic, money, moneyT, numT, RM, runCounts, confetti } from '../assets/core.js';
+import { vegaStar } from './brand.js';
 
 export const SCR = {};
 export const reg = (name, def) => { SCR[name] = def; };
@@ -7,7 +8,7 @@ export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 export const nm = o => (o && typeof o === 'object') ? (st.lang === 'ar' ? o.ar : o.en) : o;
 export const stack = [];
-export const store = { hideBal: false, motion: true, tab: 'home', lastRef: 0, mode: 'personal' };
+export const store = { hideBal: false, motion: true, tab: 'home', lastRef: 0, mode: 'personal', wallet: 0 };
 try { const q = new URLSearchParams(location.search).get('mode'); if (q === 'business' || q === 'personal') store.mode = q; else if (localStorage.getItem('vega.app.mode') === 'business') store.mode = 'business'; } catch (e) {}
 export const setMode = m => { store.mode = m; try { localStorage.setItem('vega.app.mode', m); } catch (e) {} };
 export const wait = ms => new Promise(r => setTimeout(r, RM() ? Math.min(ms, 30) : ms));
@@ -15,8 +16,8 @@ export const vp = () => $('#vp');
 export const phone = () => $('#phone');
 
 add({
-  tab_home: 'Home§Accueil§الرئيسية', tab_activity: 'Activity§Activité§النشاط', tab_scan: 'Scan§Scanner§مسح', tab_grow: 'Pockets§Poches§الجيوب', tab_me: 'Me§Moi§حسابي',
-  pin_title: 'Confirm with your PIN§Confirmez avec votre code PIN§أكّد برمز PIN', pin_sub: 'Enter any 4 digits (demo)§Saisissez 4 chiffres (démo)§أدخل أي 4 أرقام (عرض)', pin_bio: 'Use Face ID§Utiliser Face ID§استخدم بصمة الوجه',
+  tab_home: 'Home§Accueil§الرئيسية', tab_wallets: 'Wallets§Portefeuilles§المحافظ', tab_activity: 'Activity§Activité§النشاط', tab_scan: 'Scan§Scanner§مسح', tab_grow: 'Pockets§Poches§الجيوب', tab_me: 'Me§Moi§حسابي',
+  pin_title: 'Confirm with your PIN§Confirmez avec votre code PIN§أكّد برمز PIN', pin_sub: 'Enter your 4-digit PIN§Saisissez votre code à 4 chiffres§أدخل رمز PIN المكوّن من 4 أرقام', pin_bio: 'Use Face ID§Utiliser Face ID§استخدم بصمة الوجه',
   pin_bio_wait: 'Looking for your face…§Reconnaissance du visage…§جارٍ التعرّف على وجهك…',
   ref: 'Reference§Référence§المرجع', status: 'Status§Statut§الحالة', fee: 'Fee§Frais§الرسوم', total: 'Total§Total§الإجمالي', amount: 'Amount§Montant§المبلغ', from: 'From§De§من', to: 'To§À§إلى', date: 'Date§Date§التاريخ',
   free: 'Free§Gratuit§مجاني', share: 'Share§Partager§مشاركة', receipt: 'Receipt§Reçu§الإيصال', view_receipt: 'View receipt§Voir le reçu§عرض الإيصال', go_home: 'Back to home§Retour à l’accueil§العودة للرئيسية',
@@ -108,7 +109,8 @@ export const refresh = () => { const s = stack[stack.length - 1]; if (!s) return
 export const hdr = (title, { right = '', back: b = true, sub = '' } = {}) => `<header class="hd">${b ? `<button class="iconbtn fill" data-back aria-label="${t('back')}">${ic('chevron-left', 'flip')}</button>` : '<span class="hd-sp"></span>'}<span class="hd-end">${right}</span><h1 class="disp">${title}</h1>${sub ? `<p class="hd-sub muted">${sub}</p>` : ''}</header>`;
 export const scr = (inner, { head = '', foot = '', cls = '' } = {}) => `${head}<div class="body ${cls}">${inner}</div>${foot ? `<footer class="foot">${foot}</footer>` : ''}`;
 export const sectionHead = (title, link = '') => `<div class="sechead"><h2 class="disp">${title}</h2>${link}</div>`;
-export const avatar = (name, i = 0, cls = '') => `<span class="lead round f${(i % 3) + 1} ${cls}">${esc(String(name).split(/\s+/).map(w => w[0]).join('').slice(0, 2))}</span>`;
+const TONES = ['coral', 'teal', 'navy', 'sand', 'sky'];
+export const avatar = (name, i = 0, cls = '') => `<span class="av tone-${TONES[Math.abs(i) % 5]} ${cls}">${esc(String(name).split(/\s+/).map(w => w[0]).join('').slice(0, 2))}</span>`;
 export const row = ({ icon, lead, title, sub, end, go: g, p, cls = '', tag = 'button', act }) => `<${tag} class="item ${cls}" ${g ? `data-go="${g}" data-p='${JSON.stringify(p || {})}'` : ''} ${act ? `data-act="${act}"` : ''}>${lead || (icon ? `<span class="lead">${ic(icon)}</span>` : '')}<span class="sp"><span class="t">${title}</span>${sub ? `<span class="s" style="display:block">${sub}</span>` : ''}</span>${end ? `<span class="end">${end}</span>` : (g ? `<span class="muted">${ic('chevron-right', 'sm flip')}</span>` : '')}</${tag}>`;
 export const switchEl = (id, on) => `<button class="switch" role="switch" aria-checked="${on}" data-sw="${id}"></button>`;
 
@@ -207,9 +209,10 @@ export function rebuildTabbar() {
   const tb = $('.tb'); if (!tb) return;
   const hidden = $('#phone').classList.contains('notabs');
   const it = (id, icon, key) => `<button class="tbi" data-tab="${id}" aria-label="${t(key)}" aria-current="${store.tab === id && !hidden}"><span class="tbi-ic">${ic(icon)}</span><span class="tbi-l">${t(key)}</span></button>`;
+  const mid = (id, icon, key) => `<button class="tbi tbi-mid" data-tab="${id}" aria-label="${t(key)}"><span class="tbi-ic">${ic(icon, 'lg')}</span></button>`;
   tb.innerHTML = store.mode === 'business'
-    ? it('home', 'home', 'tab_home') + it('orders', 'receipt', 'b_orders') + it('pos', 'contactless', 'b_charge') + it('me', 'user', 'tab_me')
-    : it('home', 'home', 'tab_home') + it('activity', 'statement', 'tab_activity') + it('scan', 'qr-code', 'tab_scan') + it('me', 'user', 'tab_me');
+    ? it('home', 'home', 'tab_home') + it('orders', 'receipt', 'b_orders') + mid('pos', 'contactless', 'b_charge') + it('me', 'user', 'tab_me')
+    : it('home', 'home', 'tab_home') + it('wallets', 'wallet', 'tab_wallets') + mid('scan', 'qr-code', 'tab_scan') + it('activity', 'statement', 'tab_activity') + it('me', 'user', 'tab_me');
 }
 
 /* ---------- slide to confirm + processing overlay ---------- */
@@ -230,6 +233,6 @@ export function bindSlide(root, done) {
 add({ proc: 'Securing your payment…§Sécurisation du paiement…§جارٍ تأمين عمليتك…' });
 export async function processing(text = t('proc'), ms = 1300) {
   const el = document.createElement('div'); el.className = 'proc'; el.setAttribute('role', 'status');
-  el.innerHTML = `<div class="proc-in"><div class="spin"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="var(--look-brand)" stroke-width="5" stroke-linecap="round" stroke-dasharray="40 120"/></svg></div><p class="b">${text}</p></div>`;
+  el.innerHTML = `<div class="proc-in"><div class="spin"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="none" stroke="var(--look-brand)" stroke-width="4" stroke-linecap="round" stroke-dasharray="44 120"/></svg>${vegaStar('spin-star', false)}</div><p class="b">${text}</p></div>`;
   phone().appendChild(el); await wait(ms); el.classList.add('out'); await wait(260); el.remove();
 }

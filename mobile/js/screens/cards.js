@@ -1,7 +1,8 @@
-import { $, $$, S, L, t, T, tx, ic, icf, bal, num, cur, sheet, toast, confetti, haptic, esc, sleep, anim, runIn, donut, reduced } from '../util.js';
+import { $, $$, S, L, t, T, tx, ic, icf, bal, num, cur, sheet, toast, confetti, haptic, esc, sleep, anim, runIn, donut, reduced, bmark } from '../util.js';
 import { reg, go, back, tab, A, top } from '../app.js';
 import { CARDS, accBy, TX, txName, uname, bankName, ACC } from '../data.js';
 import { authorize, bioSheet } from './auth.js';
+import { txRow } from './home.js';
 
 L([
   ['Manage', 'Gérer', 'إدارة'],
@@ -11,29 +12,49 @@ L([
   ['Phone wallets', 'Portefeuilles mobiles', 'محافظ الهاتف'], ['Added', 'Ajoutée', 'مضافة'], ['Add to wallet', 'Ajouter au portefeuille', 'إضافة إلى المحفظة'], ['Token provisioned', 'Jeton créé', 'تم إنشاء الرمز'], ['Virtual card', 'Carte virtuelle', 'بطاقة افتراضية'], ['New virtual card', 'Nouvelle carte virtuelle', 'بطاقة افتراضية جديدة'], ['Instant, for online shopping', 'Instantanée, pour les achats en ligne', 'فورية، للتسوق عبر الإنترنت'],
   ['Report lost or stolen', 'Signaler perdue ou volée', 'الإبلاغ عن فقدان أو سرقة'], ['Replace card', 'Remplacer la carte', 'استبدال البطاقة'], ['Daily ATM withdrawal', 'Retrait DAB quotidien', 'السحب اليومي من الصراف'], ['Daily shop spending', 'Dépenses magasin / jour', 'الإنفاق اليومي في المتاجر'], ['Daily online spending', 'Dépenses en ligne / jour', 'الإنفاق اليومي عبر الإنترنت'], ['Save limits', 'Enregistrer les plafonds', 'حفظ الحدود'], ['Limits updated', 'Plafonds mis à jour', 'تم تحديث الحدود'],
   ['Enter new PIN', 'Saisissez le nouveau PIN', 'أدخل الرقم السري الجديد'], ['Confirm new PIN', 'Confirmez le nouveau PIN', 'أكّد الرقم السري الجديد'], ['PIN changed', 'PIN modifié', 'تم تغيير الرقم السري'], ['Choose 4 digits you can remember. Avoid birthdays.', 'Choisissez 4 chiffres. Évitez les dates de naissance.', 'اختر 4 أرقام تتذكرها وتجنب تواريخ الميلاد.'],
-  ['Online payment request', 'Demande de paiement en ligne', 'طلب دفع عبر الإنترنت'], ['Approve this payment?', 'Approuver ce paiement ?', 'الموافقة على هذه الدفعة؟'], ['Simulate a 3-D Secure request', 'Simuler une demande 3-D Secure', 'محاكاة طلب \u20663-D Secure\u2069'], ['Deny', 'Refuser', 'رفض'], ['Approve', 'Approuver', 'موافقة'], ['Payment approved', 'Paiement approuvé', 'تمت الموافقة على الدفع'],
+  ['Online payment request', 'Demande de paiement en ligne', 'طلب دفع عبر الإنترنت'], ['Approve this payment?', 'Approuver ce paiement ?', 'الموافقة على هذه الدفعة؟'], ['Deny', 'Refuser', 'رفض'], ['Approve', 'Approuver', 'موافقة'], ['Payment approved', 'Paiement approuvé', 'تمت الموافقة على الدفع'],
   ['Card limit', 'Plafond de la carte', 'حد البطاقة'], ['Used this cycle', 'Utilisé ce cycle', 'المستخدم هذه الدورة'], ['Credit limit', 'Limite de crédit', 'حد الائتمان'], ['Card activity', 'Activité de la carte', 'نشاط البطاقة'], ['Create card', 'Créer la carte', 'إنشاء البطاقة'], ['Card name', 'Nom de la carte', 'اسم البطاقة'], ['Spending cap', 'Plafond de dépenses', 'سقف الإنفاق'], ['Single-use number', 'Numéro à usage unique', 'رقم لمرة واحدة'], ['Hides your real card number from merchants', 'Cache votre vrai numéro aux commerçants', 'يخفي رقم بطاقتك الحقيقي عن التجار'],
-  ['Valid thru', 'Valide jusqu\'à', 'صالحة حتى'], ['Card frozen. Purchases are paused.', 'Carte bloquée. Les achats sont suspendus.', 'تم تجميد البطاقة. المشتريات متوقفة.'], ['Card active again', 'Carte de nouveau active', 'البطاقة نشطة من جديد'], ['Tap to pay', 'Payer sans contact', 'الدفع بالتقريب'], ['Tap-to-pay demo', 'Démo paiement sans contact', 'عرض الدفع بالتقريب'],
+  ['Valid thru', 'Valide jusqu\'à', 'صالحة حتى'], ['Card frozen. Purchases are paused.', 'Carte bloquée. Les achats sont suspendus.', 'تم تجميد البطاقة. المشتريات متوقفة.'], ['Card active again', 'Carte de nouveau active', 'البطاقة نشطة من جديد'], ['Tap to pay', 'Payer sans contact', 'الدفع بالتقريب'], ['Details', 'Détails', 'التفاصيل'], ['Card activity', 'Activité de la carte', 'نشاط البطاقة'],
 ]);
 
 const walletIc = { apple: 'phone', google: 'wallet', samsung: 'phone' };
-const cardArt = (c, i = 0) => {
+export const cardArt = (c) => {
   const fr = S.frozen[c.id];
-  return `<div class="ccard st${c.style}${fr ? ' frozen' : ''}" data-id="${c.id}"><div class="ct"><b class="disp">${esc(bankName())}</b><span class="kind">${tx(c.kind)}</span></div><div class="chip-ic"></div><div class="pan num">•••• •••• •••• ${c.no}</div><div class="cb"><div><small>${esc(uname().toUpperCase())}</small><small class="num">${t('Valid thru')} ${c.exp}</small></div><span class="rings"><i></i><i></i></span></div>${ic('contactless', 'ctl')}<div class="ice"><span>${ic('snow', 'xl')}<b>${t('Frozen')}</b></span></div></div>`;
+  return `<div class="ccard st${c.style}${fr ? ' frozen' : ''}" data-id="${c.id}"><div class="ct"><div class="cb2">${bmark()}<b>${esc(bankName())}</b></div><span class="kind">${tx(c.kind)}</span></div><div class="chiprow"><i class="chip-ic"></i>${ic('contactless')}</div><div class="pan num">•••• •••• •••• ${c.no}</div><div class="cb"><div><small>${esc(uname().toUpperCase())}</small><small class="num">${t('Valid thru')} ${c.exp}</small></div><span class="rings"><i></i><i></i></span></div><div class="ice"><span>${ic('snow', 'xl')}<b>${t('Frozen')}</b></span></div></div>`;
 };
-reg('cards', () => ({
-  nav: 'cards', bar: false, skel: `<div style="padding-top:70px">${'<div class="skel-row"><div><span class="skel"></span><span class="skel"></span></div></div>'.repeat(4)}</div>`,
-  body: `<div class="big-title">${t('Cards')}</div>
-  <div class="cc-hero rv">${cardArt(CARDS[0])}</div>
-  <div class="group rv" style="--d:1;margin-top:10px">${CARDS.map(c => `<button class="row" data-go="card" data-p='{"id":"${c.id}"}'><div class="cthumb ccard st${c.style}${S.frozen[c.id] ? ' frozen' : ''}" style="padding:0;aspect-ratio:1.586"></div><div class="tx"><b>${tx(c.name)}</b><small>${tx(c.kind)} · <span class="num">•••• ${c.no}</span></small></div><span class="badge ${S.frozen[c.id] ? 'warn' : 'ok'}">${S.frozen[c.id] ? t('Frozen') : t('Active')}</span>${icf('chevron-right', 'muted')}</button>`).join('')}
-    <button class="row" data-go="vcard"><span class="tile">${ic('plus')}</span><div class="tx"><b>${t('New virtual card')}</b><small>${t('Instant, for online shopping')}</small></div>${icf('chevron-right', 'muted')}</button></div>
-  <section class="sec rv" style="--d:2"><h3>${t('Phone wallets')}</h3><div class="group">${tokRows()}</div></section><small class="demo-tag">${t('Demonstration — simulated data')}</small>`
-}));
-A.cfreeze = (b) => { const sc = top(); const c = sc._cur ? sc._cur() : null; if (!c) return; toggleFreeze(c.id, sc) };
-function toggleFreeze(id, scope) {
+const cardAct = (ico, label, act, on) => `<button data-act="${act}" class="${on ? 'on' : ''}"><i>${ic(ico)}</i><span>${label}</span></button>`;
+reg('cards', () => {
+  const order = S.cardOrder || (S.cardOrder = CARDS.map((_, i) => i));
+  const c = CARDS[order[0]], fr = !!S.frozen[c.id];
+  return {
+    nav: 'cards', bar: false, skel: `<div style="padding-top:70px">${'<div class="skel-row"><div><span class="skel"></span><span class="skel"></span></div></div>'.repeat(4)}</div>`,
+    body: `<div class="big-title">${t('Cards')}</div>
+  <div class="cstack rv" id="cst">${order.map((i, p) => `<div class="cs" data-p="${p}" data-i="${i}" data-act="cstack">${cardArt(CARDS[i])}</div>`).join('')}</div>
+  <div class="cname rv" style="--d:1" id="cnm"><b>${tx(c.name)}</b><small>${tx(c.kind)} · <span class="num">•••• ${c.no}</span></small></div>
+  <div class="cacts rv" style="--d:2" id="cac">${cardAct('snow', fr ? t('Unfreeze card') : t('Freeze card'), 'cfr', fr)}${cardAct('eye', t('Details'), 'cdet')}${cardAct('chart-pie', t('Limits'), 'clim')}${cardAct('key', t('Change PIN'), 'cpin')}</div>
+  <section class="sec rv" style="--d:3"><h3>${t('Card activity')}</h3><div class="group">${TX.filter(x => x.via === 'card').slice(0, 4).map(txRow).join('')}</div></section>
+  <section class="sec rv" style="--d:4"><h3>${t('Phone wallets')}</h3><div class="group">${tokRows()}</div></section>
+  <div class="group rv" style="--d:5;margin-top:22px"><button class="row" data-go="vcard"><span class="tile acc">${ic('plus')}</span><div class="tx"><b>${t('New virtual card')}</b><small>${t('Instant, for online shopping')}</small></div>${icf('chevron-right', 'muted')}</button></div>`
+  };
+});
+const front = () => CARDS[(S.cardOrder || [0])[0]];
+function stackTo(i) {
+  const order = S.cardOrder; while (order[0] !== i) order.push(order.shift());
+  $$('#cst .cs').forEach(e => { e.dataset.p = order.indexOf(+e.dataset.i) });
+  const c = front(); $('#cnm b').textContent = tx(c.name); $('#cnm small').innerHTML = `${tx(c.kind)} · <span class="num">•••• ${c.no}</span>`; syncFreeze(); haptic(10);
+}
+function syncFreeze() { const b = $('#cac [data-act=cfr]'); if (!b) return; const fr = !!S.frozen[front().id]; b.classList.toggle('on', fr); $('span', b).textContent = fr ? t('Unfreeze card') : t('Freeze card') }
+A.cstack = b => { const i = +b.dataset.i; if (b.dataset.p === '0') go('card', { id: CARDS[i].id }); else stackTo(i) };
+A.cfr = () => toggleFreeze(front().id, top());
+A.cdet = () => go('card', { id: front().id });
+A.clim = () => go('limits', { id: front().id });
+A.cpin = () => go('cardpin');
+A.homeSync = syncFreeze;
+export function toggleFreeze(id, scope) {
   S.frozen[id] = !S.frozen[id]; haptic(S.frozen[id] ? 30 : 12); $$(`.ccard[data-id="${id}"]`).forEach(e => e.classList.toggle('frozen', !!S.frozen[id]));
   const lb = $('#fl', scope); if (lb) lb.textContent = S.frozen[id] ? t('Unfreeze card') : t('Freeze card'); const sw = $('#frz', scope); if (sw) sw.setAttribute('aria-checked', !!S.frozen[id]);
   const st = $('#cst', scope); if (st) { st.className = 'badge ' + (S.frozen[id] ? 'warn' : 'ok'); st.textContent = S.frozen[id] ? t('Frozen') : t('Active') }
+  $$(`.switch[data-act=homefreeze][data-id="${id}"]`).forEach(w => w.setAttribute('aria-checked', !!S.frozen[id])); syncFreeze();
   toast(S.frozen[id] ? t('Card frozen. Purchases are paused.') : t('Card active again'), S.frozen[id] ? 'snow' : 'success-check');
 }
 const tokRows = () => [['apple', 'Apple Pay'], ['google', 'Google Wallet'], ['samsung', 'Samsung Wallet']].map(([k, n]) => `<div class="row"><span class="tile ${k === 'apple' ? '' : 'f2'}">${ic(walletIc[k])}</span><div class="tx"><b>${n}</b><small>${S.tok[k] ? t('Added') + ' · <span class="num">•••• 4821</span>' : t('Add to wallet')}</small></div><button class="switch" role="switch" data-act="tok" data-k="${k}" aria-checked="${!!S.tok[k]}" aria-label="${n}"></button></div>`).join('');
@@ -48,18 +69,17 @@ reg('card', ({ id }) => {
       <div class="reveal" id="rv" hidden><div><small>${t('Card number')}</small><b class="num">4821 7093 5512 ${c.no}</b></div><div><small>${t('Expiry')}</small><b class="num">${c.exp}</b></div><div><small>${t('CVV')}</small><b class="num">418</b></div></div></div>
     ${c.limit ? `<div class="card" style="margin:16px 16px 0"><div class="between"><small class="muted">${t('Used this cycle')}</small><small class="muted">${t('Credit limit')}</small></div><div class="between"><b class="num disp" style="font-size:22px">${num(c.used, 0)}</b><b class="num">${num(c.limit, 0)} ${cur('LYD')}</b></div><div class="meter"><i style="--p:${c.used / c.limit * 100}%"></i></div></div>` : ''}
     <section class="sec"><h3>${t('Controls')}</h3><div class="group">${sw('frz', t('Freeze card'), '', !!S.frozen[c.id], 'snow')}${sw('on1', t('Online payments'), '', S.online, 'globe')}${sw('on2', t('Contactless'), '', S.contactless, 'contactless')}${sw('on3', t('International use'), '', S.intl, 'location')}${sw('on4', t('3-D Secure approvals'), t('Ask me to approve online payments'), S.threeDS, 'otp')}</div></section>
-    <section class="sec"><h3>${t('Manage')}</h3><div class="group"><button class="row" data-go="limits" data-p='{"id":"${c.id}"}'><span class="tile">${ic('chart-pie')}</span><div class="tx"><b>${t('Limits')}</b></div>${icf('chevron-right', 'muted')}</button><button class="row" data-go="cardpin"><span class="tile f2">${ic('key')}</span><div class="tx"><b>${t('Change PIN')}</b></div>${icf('chevron-right', 'muted')}</button><button class="row" data-act="s3ds"><span class="tile f3">${ic('security-shield')}</span><div class="tx"><b>${t('Simulate a 3-D Secure request')}</b></div>${icf('chevron-right', 'muted')}</button><button class="row" data-act="tap"><span class="tile">${ic('tap-to-pay')}</span><div class="tx"><b>${t('Tap-to-pay demo')}</b></div>${icf('chevron-right', 'muted')}</button></div></section>
+    <section class="sec"><h3>${t('Manage')}</h3><div class="group"><button class="row" data-go="limits" data-p='{"id":"${c.id}"}'><span class="tile">${ic('chart-pie')}</span><div class="tx"><b>${t('Limits')}</b></div>${icf('chevron-right', 'muted')}</button><button class="row" data-go="cardpin"><span class="tile f2">${ic('key')}</span><div class="tx"><b>${t('Change PIN')}</b></div>${icf('chevron-right', 'muted')}</button><button class="row" data-act="tap"><span class="tile">${ic('tap-to-pay')}</span><div class="tx"><b>${t('Tap to pay')}</b></div>${icf('chevron-right', 'muted')}</button></div></section>
     <section class="sec"><h3>${t('Phone wallets')}</h3><div class="group">${tokRows()}</div></section>
-    <div class="actions row2"><button class="btn tonal" data-act="repl">${ic('refresh')}${t('Replace card')}</button><button class="btn danger" data-act="lost">${ic('warning')}${t('Report lost or stolen')}</button></div>`,
+    <div class="actions"><button class="btn tonal" data-act="repl">${ic('refresh')}${t('Replace card')}</button><button class="btn danger" data-act="lost">${ic('warning')}${t('Report lost or stolen')}</button></div>`,
     mount(el) {
       const hero = $('.tilt', el); hero.addEventListener('pointermove', e => { if (reduced()) return; const r = hero.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; hero.style.transform = `perspective(700px) rotateY(${x * 18}deg) rotateX(${-y * 14}deg)` }); hero.addEventListener('pointerleave', () => hero.style.transform = '');
       let t0; $('#rev', el).onclick = async function () { const r = $('#rv', el); if (r.hidden) { await new Promise(res => bioSheet(res, t('Show details'))); r.hidden = false; anim(r, [{ opacity: 0, transform: 'translateY(-8px)' }, { opacity: 1, transform: 'none' }], { duration: 420 }); this.innerHTML = `${ic('eye-off', 's')} ${t('Hide details')}`; t0 = setTimeout(() => { r.hidden = true; this.innerHTML = `${ic('eye', 's')} ${t('Show details')}` }, 12000) } else { r.hidden = true; clearTimeout(t0); this.innerHTML = `${ic('eye', 's')} ${t('Show details')}` } };
     }
   };
 });
-A.s3ds = () => sheet(`<div class="auth"><span class="tile" style="margin:0 auto">${ic('otp', 'l')}</span><h2>${t('Online payment request')}</h2><div class="amt disp">89.00 <small>${cur('LYD')}</small></div><div class="kv"><div><span>${t('Merchant')}</span><b>Skyline Travel Online</b></div><div><span>${t('Card')}</span><b class="num">•••• 4821</b></div></div><p class="sub">${t('Approve this payment?')}</p><button class="btn" data-close="ok">${t('Approve')}</button><button class="btn danger" data-close="no" style="margin-top:8px">${t('Deny')}</button></div>`, { onClose: v => { if (v === 'ok') { toast(t('Payment approved'), 'success-check') } } });
-A.repl = () => toast(T('Replacement ordered (demo)', 'Remplacement demandé (démo)', 'تم طلب البطاقة البديلة (عرض)'), 'card');
-A.lost = () => sheet(`<div class="auth"><span class="tile bad" style="margin:0 auto">${ic('warning', 'l')}</span><h2>${t('Report lost or stolen')}</h2><p class="sub">${T('We will block the card immediately and issue a new one.', 'Nous bloquons la carte immédiatement et en émettons une nouvelle.', 'سنوقف البطاقة فوراً ونصدر بطاقة جديدة.')}</p><button class="btn danger" data-close="ok">${t('Report lost or stolen')}</button><button class="btn text" data-close="x" style="margin:6px auto 0;display:flex">${t('Cancel')}</button></div>`, { onClose: v => { if (v === 'ok') toast(T('Card blocked (demo)', 'Carte bloquée (démo)', 'تم إيقاف البطاقة (عرض)'), 'lock') } });
+A.repl = () => toast(T('Replacement ordered', 'Remplacement demandé', 'تم طلب البطاقة البديلة'), 'card');
+A.lost = () => sheet(`<div class="auth"><span class="tile bad" style="margin:0 auto">${ic('warning', 'l')}</span><h2>${t('Report lost or stolen')}</h2><p class="sub">${T('We will block the card immediately and issue a new one.', 'Nous bloquons la carte immédiatement et en émettons une nouvelle.', 'سنوقف البطاقة فوراً ونصدر بطاقة جديدة.')}</p><button class="btn danger" data-close="ok">${t('Report lost or stolen')}</button><button class="btn text" data-close="x" style="margin:6px auto 0;display:flex">${t('Cancel')}</button></div>`, { onClose: v => { if (v === 'ok') toast(T('Card blocked', 'Carte bloquée', 'تم إيقاف البطاقة'), 'lock') } });
 
 reg('limits', () => {
   const rows = [['atm', 'Daily ATM withdrawal', 3000, 'atm'], ['pos', 'Daily shop spending', 15000, 'pos-terminal'], ['online', 'Daily online spending', 8000, 'globe']];

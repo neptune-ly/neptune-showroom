@@ -1,17 +1,36 @@
 {
- "name": "Neptune Vega — showroom edition",
- "short_name": "Neptune Vega",
- "description": "Demonstration — simulated data",
+ "name": "Neptune Vega",
+ "short_name": "Vega",
+ "description": "Send, pay, top up and save with Neptune Vega.",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
  "orientation": "portrait",
- "background_color": "#FAF9F5",
- "theme_color": "#07315F",
+ "background_color": "#FBF7F2",
+ "theme_color": "#E5484B",
  "icons": [
-  {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
-  {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
-  {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
-  {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml"}
+  {
+   "src": "icons/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icons/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icons/maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  },
+  {
+   "src": "icon.svg",
+   "sizes": "any",
+   "type": "image/svg+xml"
+  }
  ]
 }

@@ -1,5 +1,7 @@
 // Services hub, bills, airtime & data, merchants, vouchers, split bill, exchange, scheduled payments.
-import { st, t, add, ic, esc, money, moneyT, numT, countUp, ring, fmtDate, qrSvg, confetti } from '../assets/core.js';
+import { st, t, add, ic, esc, money, moneyT, numT, countUp, ring, fmtDate, confetti } from '../assets/core.js';
+import { qrV as qrSvg } from './brand.js';
+
 import { reg, hdr, scr, row, sectionHead, avatar, nm, go, tab, sheet, closeSheet, toast, pin, keypadHtml, bindKeypad, toMinor, amtDisplay, slideHtml, bindSlide, processing, showSuccess, refNo, switchEl, wait, $, $$, rerender, refresh } from './kit.js';
 import { S, BILLERS, TELCOS, MERCH, CONTACTS, biller, telco, merchant, addTxn, person } from './data.js';
 
