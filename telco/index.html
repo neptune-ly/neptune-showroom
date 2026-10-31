@@ -1,19 +1,35 @@
 <!doctype html>
-<html lang="en" dir="ltr" data-odyssey-mode="light" data-odyssey-product="core" data-look="telco">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Neptune for Telco · Showroom</title>
-<meta name="description" content="Demonstration: two installable telecom apps led by Polaris on-device onboarding. Simulated data, invented operators.">
-<meta name="theme-color" content="#C8175D">
+<title>Lumo Pay and Sahar Cash</title>
+<meta name="description" content="Two mobile-operator wallets: Lumo Pay, your number as a wallet, and Sahar Cash, cash in and out with agents on your street.">
+<meta name="theme-color" content="#0E0B10">
 <link rel="icon" href="mobile/icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/odyssey.css">
-<link rel="stylesheet" href="../shared/looks/looks.css">
-<link rel="stylesheet" href="../shared/looks/looks-picker.css">
-<link rel="stylesheet" href="shared/tc.css">
-<link rel="stylesheet" href="stage.css">
-<script src="../shared/looks/looks.js"></script>
-<script type="module" src="stage.js"></script>
+<style>
+@font-face{font-family:"Hanken Grotesk";src:url(assets/fonts/HankenGrotesk.ttf);font-weight:100 900;font-display:swap}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%}
+body{min-height:100vh;background:#0E0B10;color:#fff;font:400 16px/1.45 "Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased;display:grid;place-items:center;padding:28px 16px}
+main{width:100%;max-width:880px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+a.app{position:relative;display:flex;flex-direction:column;gap:18px;min-height:340px;padding:28px;border-radius:32px;overflow:hidden;isolation:isolate;color:#fff;text-decoration:none;transition:transform .35s cubic-bezier(.3,1.45,.45,1)}
+a.app:hover{transform:translateY(-4px)}a.app:active{transform:scale(.98)}
+a.app::before{content:"";position:absolute;inset:0;z-index:-2;background:var(--bg)}
+a.app::after{content:"";position:absolute;inset:0;z-index:-1;background:repeating-radial-gradient(circle at 88% 4%,rgba(255,255,255,.11) 0 1.5px,transparent 1.5px 27px);-webkit-mask-image:radial-gradient(circle at 88% 4%,#000,transparent 80%);mask-image:radial-gradient(circle at 88% 4%,#000,transparent 80%)}
+a.lumo{--bg:radial-gradient(120% 62% at 6% 108%,rgba(255,176,32,.55),transparent 62%),linear-gradient(158deg,#3A0A3E,#7B1458 46%,#C21868)}
+a.sahar{--bg:radial-gradient(90% 52% at 50% 114%,rgba(255,194,61,.6),transparent 62%),linear-gradient(165deg,#03282D,#06555B 52%,#0A7A74)}
+a.app img{width:76px;height:76px;border-radius:22px;box-shadow:0 14px 30px -10px rgba(0,0,0,.6)}
+a.app h1{margin:auto 0 0;font:800 34px/1.05 "Hanken Grotesk",sans-serif;letter-spacing:-.025em}
+a.app p{margin:0;opacity:.9;max-width:300px}
+.go{align-self:flex-start;display:inline-flex;align-items:center;min-height:48px;padding:0 24px;border-radius:99px;font-weight:700;color:var(--ink)}
+a.lumo .go{background:#FFB020;color:#2A0F27}a.sahar .go{background:#FFC23D;color:#2B1A00}
+a:focus-visible{outline:3px solid #fff;outline-offset:3px}
+</style>
 </head>
-<body class="stage"><noscript>This demonstration needs JavaScript.</noscript></body>
+<body>
+<main>
+  <a class="app lumo" href="mobile/"><img src="mobile/icons/icon-192.png" alt=""><h1>Lumo Pay</h1><p>Your Lumo number as a wallet: airtime, data bundles, transfers, QR payments and vouchers.</p><span class="go">Open Lumo Pay</span></a>
+  <a class="app sahar" href="vega/"><img src="vega/icons/icon-192.png" alt=""><h1>Sahar Cash</h1><p>Cash in and out with agents on your street, send money, pay by QR and buy vouchers.</p><span class="go">Open Sahar Cash</span></a>
+</main>
+</body>
 </html>

@@ -1,37 +1,19 @@
 {
- "name": "Sahar Cash - Neptune Vega for Telco (demo)",
+ "name": "Sahar Cash",
  "short_name": "Sahar Cash",
- "description": "Demonstration: wallet-first mobile money with agents, cash-in/out and on-device Polaris onboarding. Simulated data.",
+ "description": "Cash in and out with agents near you, send money, pay by QR and buy vouchers.",
+ "id": "./",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
  "orientation": "portrait",
- "background_color": "#FFF7F9",
- "theme_color": "#2A0F1E",
+ "background_color": "#F5F8F2",
+ "theme_color": "#05434A",
  "lang": "en",
  "icons": [
-  {
-   "src": "icons/icon-192.png",
-   "sizes": "192x192",
-   "type": "image/png",
-   "purpose": "any"
-  },
-  {
-   "src": "icons/icon-512.png",
-   "sizes": "512x512",
-   "type": "image/png",
-   "purpose": "any"
-  },
-  {
-   "src": "icons/maskable-512.png",
-   "sizes": "512x512",
-   "type": "image/png",
-   "purpose": "maskable"
-  },
-  {
-   "src": "icon.svg",
-   "sizes": "any",
-   "type": "image/svg+xml"
-  }
+  { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+  { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+  { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+  { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
  ]
 }

@@ -1,13 +1,19 @@
-// Neptune Mobile for Telco - "Lumo Pay": SIM/eSIM-linked mobile-money app for the invented operator Lumo Telecom.
-// Led by Neptune Polaris onboarding (passport + liveness + face match, on-device), then wallet, bundles, bills, QR, cards, rewards.
-// Everything is simulated. State in localStorage ("telco.mobile.v1").
+// Lumo Pay: SIM/eSIM-linked wallet inside the Lumo mobile operator. Identity check on the device, then wallet, bundles, vouchers, bills, QR, cards, rewards.
+// State in localStorage ("telco.mobile.v2").
 import * as C from '../shared/core.js';
 import * as OBN from '../shared/onboarding.js';
+import * as VCH from '../shared/vouchers.js';
+import * as SET from '../shared/settings.js';
 import './strings.js';
-const { t, ic, esc, loc, money, moneyT, fmtN, fdate, ago, go, view, sheet, toast, haptic, sleep, confetti, ring, bars, fakeQR, msisdn, countUp, int, keypadHTML, bindKeypad, logoLine } = C;
+const { heroBar, t, ic, esc, loc, money, moneyT, fmtN, fdate, ago, go, view, sheet, toast, haptic, sleep, confetti, ring, bars, fakeQR, msisdn, countUp, int, keypadHTML, bindKeypad, lockup, byDay } = C;
 const DAY = 864e5;
 
-const OP = { name: { en: 'Lumo Telecom', ar: 'لومو للاتصالات', fr: 'Lumo Telecom' }, app: { en: 'Lumo Pay', ar: 'لومو باي', fr: 'Lumo Pay' }, mark: 'L', number: '+218915550142' };
+const OP = { name: { en: 'Lumo Telecom', ar: 'لومو للاتصالات', fr: 'Lumo Telecom' }, app: { en: 'Lumo Pay', ar: 'لومو باي', fr: 'Lumo Pay' }, short: { en: 'Lumo', ar: 'لومو', fr: 'Lumo' }, number: '+218915550142' };
+
+/* brand mark: an L drawn as a tide line, with the light (amber orb) and its rings */
+let MK = 0;
+const markBody = (ink = 'currentColor') => { const i = 'lm' + (++MK); return `<defs><radialGradient id="${i}" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#FFE9A8"/><stop offset=".55" stop-color="#FFB020"/><stop offset="1" stop-color="#FF7A2F"/></radialGradient></defs><g fill="none" stroke="${ink}" stroke-width="3"><circle cx="43" cy="23" r="19" opacity=".55"/><circle cx="43" cy="23" r="28" opacity=".26"/></g><path d="M15 9V39Q15 53 29 53H57" fill="none" stroke="${ink}" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="43" cy="23" r="12" fill="#FFB020" opacity=".3"/><circle cx="43" cy="23" r="9.5" fill="url(#${i})"/>`; };
+const lumoMark = n => `<svg width="${n}" height="${n}" viewBox="0 0 64 64" aria-hidden="true" style="overflow:visible">${markBody()}</svg>`;
 const PLANS = [
   { id: 'lite', name: 'pl.lite', desc: 'pl.lite_d', price: 0, f: 'f2', icon: 'signal' },
   { id: 'flex', name: 'pl.flex', desc: 'pl.flex_d', price: 2500, f: 'f1', icon: 'data' },
@@ -29,7 +35,7 @@ const VOUCH = [{ id: 1, n: 'vo.1', pts: 200, ico: 'data' }, { id: 2, n: 'vo.2', 
 function seed() {
   const n = Date.now();
   return {
-    onboarded: false, name: 'Nour', pin: '1234', bio: true, num: OP.number, sim: 'esim', kyc: 'std', profile: {}, avatar: null,
+    onboarded: false, name: 'Nour', pin: '1234', bio: true, hide: false, vouchers: [], num: OP.number, sim: 'esim', kyc: 'std', profile: {}, avatar: null,
     bal: 184250, planId: 'flex', plan: { data: { used: 6.2, total: 10 }, mins: { used: 140, total: 300 }, sms: { used: 12, total: 100 }, renews: n + 12 * DAY, auto: true },
     points: 640, streak: 3, spend: [40, 85, 0, 120, 60, 210, 95].map(x => x * 100), card: { frozen: false, online: true, nfc: true, limit: 100000 }, missions: { bundles: 1, bill: 0, qr: 0, login: 3 }, used: [],
     tx: [
@@ -38,29 +44,37 @@ function seed() {
     ],
   };
 }
-const store = C.store('telco.mobile.v1', seed);
+const fin = n => Number.isFinite(n);
+const okState = s => s && typeof s === 'object' && fin(s.bal) && fin(s.points) && fin(s.streak) && typeof s.name === 'string' && /^\+\d{12}$/.test(s.num) && /^\d{4}$/.test(s.pin)
+  && Array.isArray(s.tx) && s.tx.every(x => x && typeof x.k === 'string' && typeof x.n === 'string' && fin(x.amt) && fin(x.ts))
+  && s.plan && ['data', 'mins', 'sms'].every(k => s.plan[k] && fin(s.plan[k].used) && fin(s.plan[k].total) && s.plan[k].total > 0) && fin(s.plan.renews)
+  && Array.isArray(s.spend) && s.spend.length === 7 && s.spend.every(fin) && s.card && fin(s.card.limit) && s.missions && s.profile && typeof s.profile === 'object'
+  && (s.avatar == null || typeof s.avatar === 'string') && (s.vouchers == null || Array.isArray(s.vouchers));
+const store = C.store('telco.mobile.v2', seed, okState);
 const S = () => store.get();
 let PAY = null, UI = { wfilter: 'all', bt: 'data', showCard: false, billAcct: '' };
+const initials = () => (S().profile.name || S().name || 'N').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+const avatar = () => /^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+$/.test(S().avatar || '') ? `<img src="${S().avatar}" alt="">` : esc(initials());
 
 /* ------------------------------------------------------------------ view helpers */
-const TABS = [['home', 'home', 'm.t.home'], ['wallet', 'wallet', 'm.t.wallet'], ['cards', 'card', 'm.t.cards'], ['me', 'user', 'm.t.me']];
-const tabbar = cur => `<nav class="tabbar" aria-label="${t('m.title')}">${TABS.map(([r, i, k]) => `<a class="tab" href="#/${r}" ${cur === r ? 'aria-current="page"' : ''}><span class="pill">${ic(i)}</span><span>${t(k)}</span></a>`).join('')}</nav>`;
+const tabbar = cur => C.dock(cur, [['home', 'home', 'm.t.home'], ['wallet', 'wallet', 'm.t.wallet']], [['vouchers', 'gift', 'm.t.vouchers'], ['me', 'user', 'm.t.me']]);
 const page = (inner, { tab, ctx } = {}) => view(`<div class="screen${ctx && ctx.back ? ' back' : ''}"><div class="sc-in">${inner}</div></div>${tab ? tabbar(tab) : ''}`, { tab: !!tab });
 const topbar = (title, { back = true, end = '' } = {}) => `<div class="topbar">${back ? `<button class="iconbtn" data-back aria-label="${t('c.back')}">${ic('arrow-left', 'flip')}</button>` : ''}<h2>${title}</h2>${end}</div>`;
-const nm = k => (k && /^(c\.person|mer\.|b\.n\.|bl\.)/.test(k)) ? t(k) : (k || '');
+const nm = k => (k && /^(c\.person|mer\.|b\.n\.|bl\.|vch\.|w\.fund_)/.test(k) && C.DICT[k]) ? t(k) : (k || '');
 const txTitle = x => t('tx.' + x.k, { n: nm(x.n) });
-const TXICO = { merchant: ['qr-scan', 'f3'], p2p_in: ['receive', 'ok'], p2p_out: ['send', 'f1'], bundle: ['package', 'f2'], topup: ['topup', 'f2'], bill: ['bill', 'f3'], cashback: ['coins', 'ok'], salary: ['cash-stack', 'ok'], fund: ['wallet', 'ok'] };
-const txRow = x => { const [i, f] = TXICO[x.k] || ['wallet', 'f1']; return `<div class="item"><span class="lead ${f}">${ic(i)}</span><div><div class="t">${esc(txTitle(x))}</div><div class="s">${ago(x.ts)}</div></div><div class="end amt ${x.amt > 0 ? 'pos' : 'neg'}">${money(x.amt, { sign: true })}</div></div>`; };
+const TXICO = { merchant: ['qr-scan', 'g2'], p2p_in: ['receive', 'g3'], p2p_out: ['send', 'g1'], bundle: ['package', 'g4'], topup: ['topup', 'g1'], bill: ['bill', 'g5'], cashback: ['coins', 'g3'], salary: ['cash-stack', 'g3'], fund: ['wallet', 'g3'], voucher: ['gift', 'g2'] };
+const txRow = x => { const [i, g] = TXICO[x.k] || ['wallet', 'g1']; return `<div class="tx"><span class="gly ${g}">${ic(i)}</span><div><div class="t">${esc(txTitle(x))}</div><div class="s">${fdate(x.ts, { time: true })}</div></div><div class="end amt ${x.amt > 0 ? 'pos' : ''}">${money(x.amt, { sign: true })}</div></div>`; };
+const txGroups = list => byDay(list).map(g => `<div class="dayh">${g.label}</div><div class="txg">${g.items.map(txRow).join('')}</div>`).join('');
 const bars4 = n => `<svg viewBox="0 0 22 16" width="22" height="16" aria-label="4G+" style="vertical-align:-2px">${[0, 1, 2, 3].map(i => `<rect x="${i * 5.6}" y="${14 - (i + 1) * 3.4}" width="3.6" height="${(i + 1) * 3.4}" rx="1.2" fill="currentColor" opacity="${i < n ? 1 : .3}"/>`).join('')}</svg>`;
 const first = () => esc(S().name || 'Nour');
-const GB = n => `<span class="num">${(+n).toFixed(1).replace(/\.0$/, '')}</span> GB`;
+const GB = n => `<span class="num">${(+n).toFixed(1).replace(/\.0$/, '')}</span> ${t('u.gb')}`;
 
 /* ------------------------------------------------------------------ routes */
 const SCR = {};
 function handle(parts, ctx) {
   const s = S();
-  if (parts[0] === 'ob') { if (OBN.route(parts, ctx)) return; }
-  if (!s.onboarded && parts[0] !== 'ob') { C.replace('ob/welcome'); return; }
+  if (s.onboarded && parts[0] === 'ob') { C.replace('home'); return; }
+  if (!s.onboarded) { if (parts[0] === 'ob' && OBN.route(parts, ctx)) return; C.replace('ob/welcome'); return; }
   const name = parts[0] || 'home';
   const f = SCR[name] || SCR.home;
   f(parts.slice(1), ctx);
@@ -68,49 +82,64 @@ function handle(parts, ctx) {
 }
 
 /* ------------------------------------------------------------------ home */
+const heroTop = () => `<div class="hrow">${lockup(32)}<span class="sp"></span><a class="iconbtn glass" href="#/notifications" aria-label="${t('n.title')}">${ic('bell')}<i class="dot">3</i></a><a class="avatar" href="#/me" aria-label="${t('m.t.me')}">${avatar()}</a></div>`;
+const vcardHTML = (w) => { const s = S(), c = s.card; return `<div class="vcard ${c.frozen ? 'frozen' : ''}" ${w ? `style="width:${w}px"` : ''} aria-label="${t('cd.virtual')}"><span class="rings"></span><div class="row">${lockup(24)}<span class="sp"></span>${ic('contactless', 'lg')}</div><div class="vchip"></div>
+  <div class="pan num" dir="ltr">${UI.showCard ? '5412 7500 0000 4821' : '•••• •••• •••• 4821'}</div>
+  <div class="row" style="justify-content:space-between;align-items:flex-end"><div><div class="tiny" style="opacity:.75">${t('cd.valid')}</div><b class="num">09/29</b></div>${UI.showCard ? `<div><div class="tiny" style="opacity:.75">${t('cd.cvv')}</div><b class="num">417</b></div>` : ''}<div style="font:800 17px/1 var(--display);letter-spacing:.05em;text-align:end">${esc((s.profile.name || s.name).split(' ')[0].toUpperCase())}<div class="tiny" style="font-family:var(--font);letter-spacing:0;opacity:.75;font-weight:600;margin-top:3px">${t('cd.virtual')}</div></div></div>
+  ${c.frozen ? `<div class="frz">${ic('lock', 'lg')} ${t('cd.frozen')}</div>` : ''}</div>`; };
 SCR.home = (a, ctx) => {
-  const s = S();
-  page(`<div class="band">${logoLine()}</div>
-    <div class="greet"><div><small>${t('m.hi_s')}</small><b>${first()}</b></div><a class="iconbtn" href="#/notifications" aria-label="${t('n.title')}">${ic('bell')}</a></div>
-    <div class="balcard"><div class="t1">${t('m.t.wallet')} <span class="num" dir="ltr" style="opacity:.85;font-weight:600">${msisdn(s.num)}</span></div>
-      <div><div class="t2">${t('m.bal')} · ${C.cur()}</div><div class="bal"><div class="big-num" id="bal">${UI.hide ? '<span class="num">••••••</span>' : `<span class="num">${fmtN(s.bal)}</span>`}</div><button class="eye" data-act="eye" aria-label="${t('v.hide')}">${ic(UI.hide ? 'eye-off' : 'eye')}</button></div></div></div>
-    <div class="tiles">${[['send', 'send', 'a.send'], ['topup', 'topup', 'a.topup'], ['bundles', 'package', 'a.bundles'], ['bills', 'bill', 'a.bills']].map(([r, i, k]) => `<button class="tile4" data-go="${r}">${ic(i)}<span>${t(k)}</span></button>`).join('')}</div>
-    <div class="rows-h"><h3>${t('w.activity')}</h3><a href="#/wallet">${t('m.see_all')}</a></div>
-    <div class="rows">${s.tx.slice(0, 4).map(x => `<div class="rrow"><div><div class="t">${esc(txTitle(x))}</div><div class="s">${fdate(x.ts)}</div></div><div class="end amt ${x.amt > 0 ? 'pos' : ''}">${money(x.amt, { sign: true })}</div></div>`).join('')}</div>`, { tab: 'home', ctx });
+  const s = S(), P = s.plan, plan = PLANS.find(x => x.id === s.planId) || PLANS[1];
+  const dL = Math.max(0, P.data.total - P.data.used), mL = Math.max(0, P.mins.total - P.mins.used), sL = Math.max(0, P.sms.total - P.sms.used);
+  const days = Math.max(0, Math.ceil((P.renews - Date.now()) / DAY)), cycle = Math.min(1, Math.max(.06, days / 30));
+  const u = (pct, color, i, val, unit, lbl) => `<div class="u">${ring({ pct: Math.max(.04, pct), size: 76, stroke: 8, color, mid: ic(i) })}<div><b>${val}</b> <span style="display:inline">${unit}</span></div><span>${lbl}</span></div>`;
+  page(`<div class="hero lh"><div class="rings"></div>${heroTop()}
+      <div class="plan-t"><div class="eyebrow">${t('m.plan')} · ${bars4(4)} 4G+</div><div class="row" style="align-items:flex-end;margin-top:2px"><h1>${t(plan.name)}</h1><a class="hero-btn" href="#/bundles">${ic('plus', 'sm')} ${t('m.buy_more')}</a></div></div>
+      <div class="usage glass" role="group" aria-label="${t('m.plan')}">${u(dL / P.data.total, '#FFB020', 'data', `<span class="num">${(+dL.toFixed(1))}</span>`, t('u.gb'), t('m.data'))}${u(mL / P.mins.total, '#FFFFFF', 'voice', `<span class="num">${Math.round(mL)}</span>`, t('u.min'), t('m.mins'))}${u(sL / P.sms.total, '#FF9CC6', 'sms', `<span class="num">${Math.round(sL)}</span>`, t('u.sms'), t('m.sms'))}</div>
+      <div class="balchip glass"><span class="gly" style="width:40px;height:40px;background:rgba(255,255,255,.18);color:#fff">${ic('wallet', 'sm')}</span><div><div class="lbl">${t('m.bal')}</div><div class="big-num">${s.hide ? '<span class="num">••••••</span>' : money(s.bal)}</div></div><button class="eye" data-act="eye" aria-label="${t(s.hide ? 'v.show' : 'v.hide')}" aria-pressed="${s.hide}">${ic(s.hide ? 'eye-off' : 'eye')}</button></div></div>
+    <div class="sheetbody"><nav class="qa c5" aria-label="${t('h.quick')}">${[['topup', 'topup', 'h.topup', 1], ['bundles', 'data', 'h.data'], ['send', 'send', 'h.send'], ['scan', 'qr-scan', 'h.qr'], ['vouchers', 'gift', 'm.t.vouchers']].map(([r, i, k, hot]) => `<button data-go="${r}"><span class="qi ${hot ? 'hot' : ''}">${ic(i)}</span><span>${t(k)}</span></button>`).join('')}</nav>
+      <div class="sec" style="padding-top:22px"><div class="card simplan"><div class="top"><span class="gly g2">${ic(s.sim === 'esim' ? 'esim' : 'sim')}</span><div style="flex:1"><h3>${t(plan.name)}</h3><div class="sm muted">${t(s.sim === 'esim' ? 'm.sim_esim' : 'm.sim_sim')} · <span class="num" dir="ltr">${msisdn(s.num)}</span></div></div><span class="badge ok">${t('esim.status')}</span></div>
+        <div class="bar" aria-hidden="true"><i style="width:${Math.round(cycle * 100)}%"></i></div>
+        <div class="meta"><span>${t('m.renews', { d: `<b class="num">${days}</b>` })}</span><label class="row" style="gap:8px"><span>${t('m.autorenew')}</span><button class="switch" id="ar" role="switch" aria-checked="${P.auto}" aria-label="${t('m.autorenew')}"></button></label></div></div></div>
+      <div class="sec" style="padding-top:0"><a class="offer" href="#/vouchers"><span class="gly" style="background:rgba(42,15,39,.14);color:#2A0F27">${ic('gift')}</span><div style="flex:1"><b>${t('h.offer')}</b><small>${t('h.offer_s')}</small></div>${ic('chevron-right', 'flip')}</a></div>
+      <div class="sec-h" style="padding:6px 18px 0">${t('h.cards')}<a class="more" href="#/cards">${t('m.see_all')}</a></div>
+      <div class="hscroll">${vcardHTML(300)}<div class="pass"><div class="row"><span class="eyebrow">${t('h.pass')}</span><span class="sp"></span>${ic('trophy')}</div><div><div class="big-num num">${int(s.points)}</div><div class="sm" style="font-weight:600">${t('m.points', { n: '' }).trim()} · ${t('tier.' + tier(s.points))}</div></div><a class="btn sm" href="#/rewards" style="background:#2A0F27;color:#fff;align-self:flex-start;box-shadow:none">${t('r.h')}</a></div></div>
+      <div class="sec" style="padding-top:2px"><div class="sec-h">${t('m.recent')}<a class="more" href="#/wallet">${t('m.see_all')}</a></div>${txGroups(s.tx.slice(0, 6)).replace(/^<div class="dayh">/, '<div class="dayh" style="padding-top:2px">')}</div></div>`, { tab: 'home', ctx });
+  C.$('#ar').addEventListener('click', e => { store.set(x => { x.plan.auto = !x.plan.auto; }); e.currentTarget.setAttribute('aria-checked', S().plan.auto); });
 };
-C.actions.eye = () => { UI.hide = !UI.hide; SCR.home([], { back: false }); };
+C.actions.eye = () => { store.set(s => { s.hide = !s.hide; }); SCR.home([], { back: false }); };
 const tier = pts => pts >= 3000 ? 'platinum' : pts >= 1000 ? 'gold' : 'silver';
 
 /* ------------------------------------------------------------------ wallet */
 SCR.wallet = (a, ctx) => {
   const s = S(), f = UI.wfilter, list = s.tx.filter(x => f === 'all' || (f === 'in' ? x.amt > 0 : x.amt < 0));
   const spent = s.spend.reduce((x, y) => x + y, 0);
-  page(`${topbar(t('w.h'), { back: false, end: `<button class="iconbtn tonal" data-act="fund" aria-label="${t('w.add')}">${ic('plus')}</button>` })}
-    <div class="sec stagger">
-      <div class="pocket brand" style="display:flex;flex-direction:column;gap:6px"><span class="eyebrow">${t('m.bal')}</span><div class="big-num">${money(s.bal)}</div><div class="row" style="margin-top:8px"><button class="btn accent sm" data-act="fund">${ic('plus', 'sm')} ${t('w.add')}</button><button class="btn sm tonal" data-go="send">${ic('send', 'sm')} ${t('a.send')}</button></div></div>
-      <div class="card"><div class="row" style="justify-content:space-between"><div><div class="tiny muted">${t('w.spent')}</div><div style="font:var(--dw) 22px var(--display)">${money(spent)}</div></div><span class="badge ok">${ic('trending-down', 'sm')} 12%</span></div>${bars(s.spend, 5)}<div class="row tiny muted" style="justify-content:space-between;margin-top:4px">${['S', 'S', 'M', 'T', 'W', 'T', 'F'].map(d => `<span>${d}</span>`).join('')}</div></div>
-      <div class="sec-h">${t('w.activity')}</div>
-      <div class="seg full" role="group">${[['all', 'w.all'], ['in', 'w.in'], ['out', 'w.out']].map(([k, l]) => `<button data-wf="${k}" aria-pressed="${f === k}">${t(l)}</button>`).join('')}</div>
-      <div class="list">${list.map(txRow).join('')}</div>
-    </div>`, { tab: 'wallet', ctx });
+  page(`<div class="hero compact"><div class="rings"></div>${heroTop()}
+      <div class="eyebrow" style="margin-top:18px;opacity:.85">${t('m.bal')} · ${C.cur()}</div><div class="big-num" style="font-size:46px;margin-top:4px">${s.hide ? '<span class="num">••••••</span>' : money(s.bal, { cur: false })}</div>
+      <div class="row" style="margin-top:18px"><button class="btn light sm" data-act="fund" style="flex:1">${ic('plus', 'sm')} ${t('w.add')}</button><button class="btn glass sm" data-go="send" style="flex:1">${ic('send', 'sm')} ${t('a.send')}</button></div></div>
+    <div class="sheetbody"><div class="sec stagger" style="padding-top:18px">
+      <div class="card"><div class="row" style="justify-content:space-between"><div><div class="tiny muted">${t('w.spent')}</div><div style="font:var(--dw) 24px var(--display)">${money(spent)}</div></div><span class="badge ok">${ic('trending-down', 'sm')} 12%</span></div>${bars(s.spend, 5)}<div class="row tiny muted" style="justify-content:space-between;margin-top:4px">${[6, 5, 4, 3, 2, 1, 0].map(d => `<span>${fdate(Date.now() - d * DAY, { wd: 1 })}</span>`).join('')}</div></div>
+      <div class="seg full" role="group" aria-label="${t('w.activity')}">${[['all', 'w.all'], ['in', 'w.in'], ['out', 'w.out']].map(([k, l]) => `<button data-wf="${k}" aria-pressed="${f === k}">${t(l)}</button>`).join('')}</div>
+      <div>${txGroups(list)}</div></div></div>`, { tab: 'wallet', ctx });
   C.appEl().querySelectorAll('[data-wf]').forEach(b => b.addEventListener('click', () => { UI.wfilter = b.dataset.wf; SCR.wallet([], { back: false }); }));
 };
 C.actions.fund = () => {
   const sh = sheet(`<h3>${t('w.fund')}</h3><div class="list">${[['atm', 'w.fund_a', 'cash'], ['accounts', 'w.fund_b', 'bank'], ['card', 'w.fund_c', 'card']].map(([i, k, id]) => `<button class="item" data-fund="${id}"><span class="lead f2">${ic(i)}</span><div class="t">${t(k)}</div><span class="chev end">${ic('chevron-right', 'flip')}</span></button>`).join('')}</div>`);
   sh.el.querySelectorAll('[data-fund]').forEach(b => b.addEventListener('click', () => { sh.close(); credit(10000, 'fund', b.dataset.fund === 'cash' ? 'w.fund_a' : b.dataset.fund === 'bank' ? 'w.fund_b' : 'w.fund_c'); }));
 };
-function credit(amt, k, n) { store.set(s => { s.bal += amt; s.tx.unshift({ id: C.uid(), k, n: n ? t(n) : '', amt, ts: Date.now() }); }); haptic(20); toast(t('p.paid')); C.rerender(); }
+function credit(amt, k, n) { store.set(s => { s.bal += amt; s.tx.unshift({ id: C.uid(), k, n: n || '', amt, ts: Date.now() }); }); haptic(20); toast(t('p.paid')); C.rerender(); }
 
 /* ------------------------------------------------------------------ payment flow (shared by send / topup / bundles / bills / QR) */
-function startPay(p) { PAY = { fee: 0, amount: 0, typed: '', points: 0, ...p }; go(PAY.fixed ? 'pay/review' : 'pay/amount'); }
+function startPay(p, rep) { PAY = { fee: 0, amount: 0, typed: '', points: 0, ...p }; (rep ? C.replace : go)(PAY.fixed ? 'pay/review' : 'pay/amount'); }
 SCR.pay = (a, ctx) => {
-  if (!PAY) return go('home');
   const step = a[0];
+  if (step === 'm') { const m = MERCH.find(x => x.id === +a[1]); if (!m) return C.replace('scan'); PAY = null; return payMerchant(m, true); }
+  if (!PAY) return C.replace('home');
   if (step === 'amount') return payAmount(ctx);
   if (step === 'review') return payReview(ctx);
   if (step === 'done') return payDone(ctx);
-  if (step === 'm') { const m = MERCH.find(x => x.id === +a[1]); startPay({ kind: 'merchant', n: m.n, to: t(m.n), ico: m.ico, cashback: true, title: t('q.found') }); }
+  C.replace('home');
 };
+const payMerchant = (m, rep) => startPay({ kind: 'merchant', n: m.n, to: t(m.n), ico: m.ico, cashback: true, title: t('q.found') }, rep);
 function payAmount(ctx) {
   const P = PAY;
   page(`${topbar(P.title || t('s.h'))}
@@ -142,14 +171,7 @@ function payReview(ctx) {
     </div>`, { ctx });
   C.$('#pay').addEventListener('click', () => pinSheet(() => commitPay()));
 }
-function pinSheet(ok) {
-  let v = '';
-  const sh = sheet(`<h3 style="text-align:center">${t('p.enter_pin')}</h3><div class="pin-dots" id="pd">${[0, 1, 2, 3].map(() => '<i></i>').join('')}</div><p class="hint" id="ph" style="text-align:center">${t('p.pin_hint', { p: esc(S().pin) })}</p>${keypadHTML()}${S().bio ? `<button class="btn tonal block" id="bio">${ic('face-id')} ${t('p.use_face')}</button>` : ''}`);
-  const dots = sh.el.querySelector('#pd');
-  const bump = () => [...dots.children].forEach((d, i) => d.classList.toggle('on', i < v.length));
-  bindKeypad(sh.el.querySelector('.keypad'), { max: 4, onChange: async x => { v = x; bump(); if (v.length === 4) { await sleep(160); if (v === S().pin) { sh.close(); ok(); } else { dots.classList.add('err'); haptic(60); sh.el.querySelector('#ph').textContent = t('p.wrong'); sh.el.querySelector('#ph').style.color = 'var(--err)'; await sleep(420); dots.classList.remove('err'); v = ''; bump(); } } } });
-  const bio = sh.el.querySelector('#bio'); if (bio) bio.addEventListener('click', async () => { bio.innerHTML = `${ic('face-id')} …`; await sleep(700); sh.close(); ok(); });
-}
+const pinSheet = (ok, o = {}) => C.pinSheet(ok, { pin: () => S().pin, bio: S().bio, ...o });
 function commitPay() {
   const P = PAY, total = P.amount + P.fee; let pts = 0;
   store.set(s => {
@@ -161,18 +183,14 @@ function commitPay() {
     if (P.onOk) P.onOk(s);
   });
   P.ref = 'LP' + Math.random().toString(36).slice(2, 8).toUpperCase(); P.pts = pts; P.at = Date.now(); haptic([20, 30, 50]);
-  go('pay/done');
+  C.reset('home', 'pay/done');
 }
 function payDone(ctx) {
   const P = PAY;
-  page(`<div class="sc-in" style="justify-content:center;align-items:center;text-align:center;padding:26px 22px;gap:14px;min-height:100%">
-    <div class="anim-pop" style="width:112px;height:112px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center">${ic('success-check', 'xl')}</div>
-    <h1 style="font:var(--dw) 28px var(--display)">${t(P.kind === 'p2p_out' ? 'p.sent' : 'p.paid')}</h1>
-    <div class="big-num">${money(P.amount)}</div><p class="muted">${esc(P.to)}</p>
-    <div class="list" style="width:100%;text-align:start"><div class="item"><div class="s">${t('p.ref')}</div><div class="end num" dir="ltr">${P.ref}</div></div><div class="item"><div class="s">${t('p.when')}</div><div class="end">${fdate(P.at, { time: true })}</div></div></div>
-    <span class="badge ok">${ic('gift', 'sm')} ${t('p.points', { n: P.pts })}</span>
-    <div class="row" style="width:100%"><button class="btn tonal" style="flex:1" data-act="share">${ic('share')} ${t('p.share')}</button><button class="btn" style="flex:1" data-go="home">${t('p.done')}</button></div></div>`, { ctx });
-  
+  page(C.success({ title: t(P.kind === 'p2p_out' ? 'p.sent' : 'p.paid'), sub: esc(P.to), big: `<div class="big-num">${money(P.amount)}</div><span class="badge ok" style="margin-top:8px">${ic('gift', 'sm')} ${t('p.points', { n: P.pts })}</span>`,
+    rows: `<div class="list"><div class="item"><div class="s">${t('p.ref')}</div><div class="end num" dir="ltr">${P.ref}</div></div><div class="item"><div class="s">${t('p.when')}</div><div class="end">${fdate(P.at, { time: true })}</div></div></div>`,
+    foot: `<div class="row"><button class="btn tonal" style="flex:1" data-act="share">${ic('share')} ${t('p.share')}</button><button class="btn" style="flex:1" data-go="home">${t('p.done')}</button></div>` }), { ctx });
+  confetti(C.appEl(), 30, .5);
 }
 C.actions.share = () => toast(t('p.share'), 'share');
 
@@ -198,25 +216,27 @@ SCR.topup = (a, ctx) => {
     <div class="sec">
       <div class="sec-h">${t('t.who')}</div>
       <div class="seg full" id="who"><button data-w="mine" aria-pressed="true">${t('t.mine')}</button><button data-w="other" aria-pressed="false">${t('t.other')}</button></div>
-      <div class="field"><label>${t('ob.number')}</label><input class="input ltr" id="tn" value="${msisdn(S().num)}" readonly></div>
+      <div class="field"><label for="tn">${t('ob.number')}</label><input class="input ltr" id="tn" inputmode="tel" autocomplete="off" value="${msisdn(S().num)}" readonly aria-describedby="tnh"><span class="hint" id="tnh" hidden>${t('ob.number_h')}</span></div>
       <div class="sec-h">${t('t.choose')}</div>
       <div class="grid3" id="ta">${[5, 10, 20, 50, 100, 200].map(v => `<button class="chip" data-a="${v}" aria-pressed="${v === 20}" style="min-height:60px;justify-content:center;font-size:18px;font-weight:800">${v}</button>`).join('')}</div>
       <div class="pocket f3 sm" style="display:flex;gap:10px;align-items:center">${ic('gift', 'sm')} ${t('t.bonus')}</div>
       <button class="btn block" id="tgo">${t('p.review')}${ic('arrow-right', 'flip')}</button>
     </div>`, { ctx });
-  amt = 2000;
-  C.$$('#who button').forEach(b => b.addEventListener('click', () => { who = b.dataset.w; C.$$('#who button').forEach(x => x.setAttribute('aria-pressed', x === b)); const i = C.$('#tn'); i.readOnly = who === 'mine'; i.value = who === 'mine' ? msisdn(S().num) : ''; if (who === 'other') i.focus(); }));
+  const digits = () => C.$('#tn').value.replace(/\D/g, '').replace(/^218/, '');
+  const valid = () => { const ok = who === 'mine' || /^9\d{8}$/.test(digits()); C.$('#tgo').disabled = !ok; return ok; };
+  C.$$('#who button').forEach(b => b.addEventListener('click', () => { who = b.dataset.w; C.$$('#who button').forEach(x => x.setAttribute('aria-pressed', x === b)); const i = C.$('#tn'); i.readOnly = who === 'mine'; i.value = who === 'mine' ? msisdn(S().num) : ''; C.$('#tnh').hidden = who === 'mine'; i.placeholder = who === 'mine' ? '' : '9X XXX XXXX'; valid(); if (who === 'other') i.focus(); }));
+  C.$('#tn').addEventListener('input', valid);
   C.$$('#ta .chip').forEach(b => b.addEventListener('click', () => { amt = +b.dataset.a * 100; C.$$('#ta .chip').forEach(x => x.setAttribute('aria-pressed', x === b)); haptic(8); }));
-  C.$('#tgo').addEventListener('click', () => startPay({ kind: 'topup', amount: amt, fixed: true, to: C.$('#tn').value || msisdn(S().num), ico: 'topup', n: '', onOk: s => { if (amt >= 2000) s.points += 20; } }));
+  C.$('#tgo').addEventListener('click', () => { if (!valid()) return; startPay({ kind: 'topup', amount: amt, fixed: true, to: who === 'mine' ? S().num.replace(/^(\+\d{3})(\d{2})(\d{3})(\d{4})$/, '$1 $2 $3 $4') : '+218 ' + digits().replace(/(\d{2})(\d{3})(\d{4})/, '$1 $2 $3'), ico: 'topup', n: '', onOk: s => { if (amt >= 2000) s.points += 20; } }); });
 };
 
 /* ------------------------------------------------------------------ bundles */
 SCR.bundles = (a, ctx) => {
   const s = S(), tab = UI.bt, list = BUNDLES[tab];
-  page(`${topbar(t('b.h'), { back: false })}
+  page(`${heroBar(t('b.h'))}
     <div class="sec stagger">
-      <div class="card" style="display:flex;align-items:center;gap:14px">${ring({ pct: Math.max(0.02, (s.plan.data.total - s.plan.data.used) / s.plan.data.total), size: 70, stroke: 9, mid: `<span class="num" style="font-weight:800">${Math.max(0, s.plan.data.total - s.plan.data.used).toFixed(1).replace(/\.0$/, '')}</span>` })}<div style="flex:1"><b>${t('m.data')}</b><div class="sm muted">${t('m.left', { a: GB(Math.max(0, s.plan.data.total - s.plan.data.used)), b: GB(s.plan.data.total) })}</div></div><label class="col" style="gap:4px;align-items:center"><button class="switch" id="ar" role="switch" aria-checked="${s.plan.auto}" aria-label="${t('m.autorenew')}"></button><span class="tiny muted">${t('m.autorenew')}</span></label></div>
-      <div class="seg full" role="tablist">${[['data', 'b.data'], ['voice', 'b.voice'], ['combo', 'b.combo']].map(([k, l]) => `<button role="tab" data-bt="${k}" aria-pressed="${tab === k}">${t(l)}</button>`).join('')}</div>
+      <div class="card" style="display:flex;flex-wrap:wrap;align-items:center;gap:14px">${ring({ pct: Math.max(0.02, (s.plan.data.total - s.plan.data.used) / s.plan.data.total), size: 70, stroke: 9, mid: `<span class="num" style="font-weight:800">${Math.max(0, s.plan.data.total - s.plan.data.used).toFixed(1).replace(/\.0$/, '')}</span>` })}<div style="flex:1"><b>${t('m.data')}</b><div class="sm muted">${t('m.left', { a: GB(Math.max(0, s.plan.data.total - s.plan.data.used)), b: GB(s.plan.data.total) })}</div></div><label class="col" style="gap:4px;align-items:center"><button class="switch" id="ar" role="switch" aria-checked="${s.plan.auto}" aria-label="${t('m.autorenew')}"></button><span class="tiny muted">${t('m.autorenew')}</span></label></div>
+      <div class="seg full" role="group" aria-label="${t('b.h')}">${[['data', 'b.data'], ['voice', 'b.voice'], ['combo', 'b.combo']].map(([k, l]) => `<button data-bt="${k}" aria-pressed="${tab === k}">${t(l)}</button>`).join('')}</div>
       <div class="col">${list.map(b => `<div class="card bnd" style="display:flex;gap:14px;align-items:center;min-height:84px;position:relative">${b.pop ? `<span class="badge warn" style="position:absolute;top:-10px;inset-inline-end:14px">${ic('star', 'sm')} ${t('b.popular')}</span>` : ''}<span class="lead" style="width:54px;height:54px;border-radius:16px;background:var(--${b.gb && b.min ? 'f3' : b.gb ? 'f1' : 'f2'});display:grid;place-items:center;color:var(--brand);flex:none">${ic(b.gb && b.min ? 'package' : b.gb ? 'data' : 'voice', 'lg')}</span><div style="flex:1;min-width:0"><div style="font-weight:800;line-height:1.2">${t(b.n)}</div><div class="sm muted">${b.d === 'b.night' ? t('b.night') : t('b.valid', { d: t(b.d) })}</div></div><button class="btn sm" data-b="${b.id}" style="min-width:92px">${money(b.price, { short: true })}</button></div>`).join('')}</div>
     </div>`, { tab: 'bundles', ctx });
   C.$$('[data-bt]').forEach(b => b.addEventListener('click', () => { UI.bt = b.dataset.bt; SCR.bundles([], { back: false }); }));
@@ -227,10 +247,10 @@ SCR.bundles = (a, ctx) => {
 /* ------------------------------------------------------------------ bills */
 SCR.bills = (a, ctx) => {
   if (a[0]) return billDetail(a[0], ctx);
-  page(`${topbar(t('bl.h'))}<div class="sec"><div class="grid2 stagger">${BILLS.map(b => `<a class="card" href="#/bills/${b.id}" style="display:flex;flex-direction:column;gap:10px;min-height:112px;transition:transform .3s var(--spring-s)"><span class="lead" style="width:50px;height:50px;border-radius:16px;background:var(--f${(BILLS.indexOf(b) % 3) + 1});display:grid;place-items:center;color:var(--brand)">${ic(b.ico, 'lg')}</span><b>${t(b.k)}</b></a>`).join('')}</div></div>`, { ctx });
+  page(`${heroBar(t('bl.h'))}<div class="sec"><div class="grid2 stagger">${BILLS.map(b => `<a class="card" href="#/bills/${b.id}" style="display:flex;flex-direction:column;gap:10px;min-height:112px;transition:transform .3s var(--spring-s)"><span class="lead" style="width:50px;height:50px;border-radius:16px;background:var(--f${(BILLS.indexOf(b) % 3) + 1});display:grid;place-items:center;color:var(--brand)">${ic(b.ico, 'lg')}</span><b>${t(b.k)}</b></a>`).join('')}</div></div>`, { ctx });
 };
 function billDetail(id, ctx) {
-  const b = BILLS.find(x => x.id === id); let found = false;
+  const b = BILLS.find(x => x.id === id); if (!b) return C.replace('bills');
   page(`${topbar(t(b.k))}<div class="sec">
     <div class="field"><label for="ba">${t('bl.acct')}</label><input id="ba" class="input ltr" inputmode="numeric" value="${esc(UI.billAcct || '4408 1127 36')}"></div>
     <button class="btn tonal block" id="bl">${ic('search')} ${t('bl.lookup')}</button>
@@ -240,92 +260,51 @@ function billDetail(id, ctx) {
 }
 
 /* ------------------------------------------------------------------ QR */
-SCR.scan = (a, ctx) => {
-  view(`<div class="screen" style="background:#05080e;color:#fff;animation:none"><div class="sc-in" style="min-height:100%">
-    <div class="topbar" style="color:#fff"><button class="iconbtn" data-back aria-label="${t('c.back')}">${ic('arrow-left', 'flip')}</button><h2>${t('q.scan_h')}</h2><a class="iconbtn" href="#/myqr" aria-label="${t('q.myqr_h')}">${ic('qr-code')}</a></div>
-    <div style="flex:1;display:grid;place-items:center;position:relative"><div class="vf" style="width:260px;height:260px;position:relative;border-radius:28px;background:repeating-linear-gradient(45deg,#0c1420 0 8px,#0a111b 8px 16px)"><i class="c c1"></i><i class="c c2"></i><i class="c c3"></i><i class="c c4"></i><i class="ln"></i>
-      <span style="position:absolute;inset:0;display:grid;place-items:center;opacity:.35">${ic('qr-scan', 'xl')}</span></div></div>
-    <p style="text-align:center;opacity:.8;padding:0 24px">${t('q.point')}</p>
-    <div class="sec" style="padding-bottom:30px"><div class="eyebrow" style="opacity:.6">${t('q.demo_pick')}</div><div class="grid2">${MERCH.map(m => `<button class="chip" data-m="${m.id}" style="background:rgba(255,255,255,.12);color:#fff;min-height:52px;justify-content:center">${ic(m.ico, 'sm')} ${t(m.n)}</button>`).join('')}</div></div>
-  </div></div>
-  <style>.vf .c{position:absolute;width:44px;height:44px;border:5px solid var(--accent)}.vf .c1{top:-3px;left:-3px;border-width:5px 0 0 5px;border-top-left-radius:26px}.vf .c2{top:-3px;right:-3px;border-width:5px 5px 0 0;border-top-right-radius:26px}.vf .c3{bottom:-3px;left:-3px;border-width:0 0 5px 5px;border-bottom-left-radius:26px}.vf .c4{bottom:-3px;right:-3px;border-width:0 5px 5px 0;border-bottom-right-radius:26px}.vf .ln{position:absolute;inset-inline:10px;height:3px;background:var(--accent);animation:vfs 2.4s ease-in-out infinite}@keyframes vfs{0%,100%{top:8%}50%{top:90%}}</style>`);
-  C.$$('[data-m]').forEach(b => b.addEventListener('click', () => { haptic(25); go('pay/m/' + b.dataset.m); }));
-};
+SCR.scan = () => C.scanView({ merch: MERCH, end: `<a class="iconbtn" href="#/myqr" aria-label="${t('q.myqr_h')}">${ic('qr-code')}</a>`, onPick: id => payMerchant(MERCH.find(x => x.id === id)) });
 SCR.myqr = (a, ctx) => {
   const s = S();
   page(`${topbar(t('q.myqr_h'))}<div class="sec" style="align-items:center;text-align:center">
     <div class="pocket f2" style="width:100%;padding:26px;display:flex;flex-direction:column;align-items:center;gap:14px"><div style="width:230px;background:#fff;color:#111;padding:14px;border-radius:24px">${fakeQR('LUMO-' + s.num, 27)}</div><div><b style="font:var(--dw) 20px var(--display)">${esc(s.profile.name || s.name)}</b><div class="num" dir="ltr">${msisdn(s.num)}</div></div></div>
-    <p class="muted sm" style="max-width:300px">${t('q.myqr_s')}</p><p class="hint">${t('c.qr_demo')}</p></div>`, { ctx });
+    <p class="muted sm" style="max-width:300px">${t('q.myqr_s')}</p><p class="hint">${t('c.qr')}</p></div>`, { ctx });
 };
 
 /* ------------------------------------------------------------------ cards */
 SCR.cards = (a, ctx) => {
   const s = S(), c = s.card, show = UI.showCard;
-  page(`${topbar(t('cd.h'), { back: false })}
+  page(`${heroBar(t('cd.h'))}
     <div class="sec stagger">
-      <div class="vcard ${c.frozen ? 'frozen' : ''}" aria-label="${t('cd.virtual')}"><div class="row"><span class="opmark" style="font-size:16px"><i style="width:26px;height:26px;font-size:15px;border-radius:9px">${OP.mark}</i>${esc(loc(OP.app))}</span><span class="sp"></span>${ic('contactless', 'lg')}</div>
-        <div class="pan num" dir="ltr">${show ? '5412 7500 0000 4821' : '•••• •••• •••• 4821'}</div>
-        <div class="row" style="justify-content:space-between;align-items:flex-end"><div><div class="tiny" style="opacity:.7">${t('cd.valid')}</div><b class="num">09/29</b></div>${show ? `<div><div class="tiny" style="opacity:.7">${t('cd.cvv')}</div><b class="num">417</b></div>` : ''}<div style="font:800 20px/1 var(--display);letter-spacing:.05em;text-align:end">${esc((s.profile.name || s.name).split(' ')[0].toUpperCase())}<div class="tiny" style="font-family:var(--font);letter-spacing:0;opacity:.7;font-weight:600">${t('cd.virtual')}</div></div></div>
-        ${c.frozen ? `<div class="frz">${ic('lock', 'lg')} ${t('cd.frozen')}</div>` : ''}</div>
+      ${vcardHTML()}
       <div class="row"><button class="btn tonal" style="flex:1" id="sd">${ic(show ? 'eye-off' : 'eye', 'sm')} ${t(show ? 'cd.hide' : 'cd.show')}</button><button class="btn tonal" style="flex:1" data-act="addw">${ic('card-add', 'sm')} ${t('cd.wallet')}</button></div>
       ${show ? `<p class="hint" style="text-align:center">${t('cd.auto_hide')}</p>` : ''}
       <div class="list">${[['freeze', 'lock', 'cd.freeze', c.frozen], ['online', 'globe', 'cd.online', c.online], ['nfc', 'contactless', 'cd.nfc', c.nfc]].map(([k, i, l, on]) => `<div class="item"><span class="lead f${k === 'freeze' ? 3 : 1}">${ic(i)}</span><div class="t" style="flex:1">${t(l)}</div><button class="switch" data-sw="${k}" role="switch" aria-checked="${on}" aria-label="${t(l)}"></button></div>`).join('')}
         <div class="item"><span class="lead f2">${ic('chart-pie')}</span><div><div class="t">${t('cd.limit')}</div><div class="s">${moneyT(c.limit, true)}</div></div><input type="range" min="10000" max="500000" step="10000" value="${c.limit}" id="lim" style="margin-inline-start:auto;width:120px;accent-color:var(--brand)" aria-label="${t('cd.limit')}"></div></div>
-      <p class="legal">${t('cd.note')}</p>
-    </div>
-    <style>.vcard{position:relative;border-radius:var(--r-big);padding:20px;min-height:200px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;color:var(--on-hero);background:var(--hero);transition:filter .4s}.vcard.frozen{filter:grayscale(1) brightness(.8)}.vcard .pan{font:700 21px var(--font);letter-spacing:.1em}.vcard .frz{position:absolute;inset:0;border-radius:inherit;background:rgba(10,20,40,.55);display:flex;gap:10px;align-items:center;justify-content:center;font:800 20px var(--display);backdrop-filter:blur(2px)}</style>`, { tab: 'cards', ctx });
+    </div>`, { tab: 'cards', ctx });
   C.$('#sd').addEventListener('click', () => { UI.showCard = !UI.showCard; SCR.cards([], { back: false }); if (UI.showCard) { clearTimeout(UI.ct); UI.ct = setTimeout(() => { UI.showCard = false; if (C.path() === 'cards') SCR.cards([], { back: false }); }, 10000); } });
   C.$$('[data-sw]').forEach(b => b.addEventListener('click', () => { store.set(x => { x.card[b.dataset.sw] = !x.card[b.dataset.sw]; }); haptic(12); SCR.cards([], { back: false }); }));
   C.$('#lim').addEventListener('change', e => { store.set(x => { x.card.limit = +e.target.value; }); SCR.cards([], { back: false }); });
 };
-C.actions.addw = () => { const sh = sheet(`<h3>${t('cd.wallet')}</h3><div class="list"><div class="item"><span class="lead f1">${ic('tap-to-pay')}</span><div class="t">Apple Pay</div><span class="badge info end">demo</span></div><div class="item"><span class="lead f2">${ic('tap-to-pay')}</span><div class="t">Google Pay</div><span class="badge info end">demo</span></div></div><p class="legal">${t('cd.note')}</p><button class="btn block" data-close>${t('p.done')}</button>`); void sh; };
+C.actions.addw = () => { sheet(`<h3>${t('cd.wallet')}</h3><div class="list"><div class="item"><span class="lead f1">${ic('tap-to-pay')}</span><div><div class="t">${t('cd.tap')}</div><div class="s">${t('cd.tap_s')}</div></div></div></div><button class="btn block" data-close>${t('p.done')}</button>`); };
 
 /* ------------------------------------------------------------------ rewards */
 SCR.rewards = (a, ctx) => {
   const s = S(), tp = tier(s.points), nextAt = tp === 'silver' ? 1000 : tp === 'gold' ? 3000 : 6000, nextN = tp === 'silver' ? 'gold' : tp === 'gold' ? 'platinum' : 'platinum', prev = tp === 'silver' ? 0 : tp === 'gold' ? 1000 : 3000;
   const M = [['ms.1', s.missions.bundles, 2, 'package'], ['ms.2', s.missions.bill, 1, 'bill'], ['ms.3', s.missions.qr, 1, 'qr-scan'], ['ms.4', s.streak, 7, 'flame']];
-  page(`${topbar(t('r.h'), { back: false })}
+  page(`${heroBar(t('r.h'))}
     <div class="sec stagger">
-      <div class="pocket brand" style="display:flex;gap:18px;align-items:center">${ring({ pct: (s.points - prev) / (nextAt - prev), size: 112, stroke: 12, color: 'var(--accent)', mid: `<div><div class="big-num num" style="font-size:26px" data-count="${s.points}">0</div><div class="tiny" style="opacity:.8">pts</div></div>` })}<div><span class="badge warn">${ic('trophy', 'sm')} ${t('tier.' + tp)}</span><div style="font:var(--dw) 20px/1.2 var(--display);margin-top:8px">${t('r.next', { n: `<span class="num">${Math.max(0, nextAt - s.points)}</span>`, t: t('tier.' + nextN) })}</div><div class="sm" style="opacity:.8;margin-top:4px">${ic('flame', 'sm')} ${t('m.streak', { n: s.streak })}</div></div></div>
+      <div class="pocket brand" style="display:flex;gap:18px;align-items:center">${ring({ pct: (s.points - prev) / (nextAt - prev), size: 112, stroke: 12, color: 'var(--accent)', mid: `<div><div class="big-num num" style="font-size:26px" data-count="${s.points}">0</div><div class="tiny" style="opacity:.8">${t('r.pts')}</div></div>` })}<div><span class="badge warn">${ic('trophy', 'sm')} ${t('tier.' + tp)}</span><div style="font:var(--dw) 20px/1.2 var(--display);margin-top:8px">${t('r.next', { n: `<span class="num">${Math.max(0, nextAt - s.points)}</span>`, t: t('tier.' + nextN) })}</div><div class="sm" style="opacity:.8;margin-top:4px">${ic('flame', 'sm')} ${t('m.streak', { n: s.streak })}</div></div></div>
       <div class="sec-h">${t('r.missions')}</div>
       <div class="list">${M.map(([k, v, g, i]) => `<div class="item"><span class="lead ${v >= g ? 'ok' : 'f2'}">${ic(v >= g ? 'success-check' : i)}</span><div style="flex:1"><div class="t">${t(k)}</div><div class="bar" style="height:7px;margin-top:6px"><i style="width:${Math.min(100, v / g * 100)}%"></i></div></div><span class="end num">${Math.min(v, g)}/${g}</span></div>`).join('')}</div>
       <div class="sec-h">${t('r.vouchers')}</div>
-      <div class="col">${VOUCH.map(v => `<div class="card" style="display:flex;align-items:center;gap:14px"><span class="lead" style="width:50px;height:50px;border-radius:16px;background:var(--f${v.id});display:grid;place-items:center;color:var(--brand)">${ic(v.ico, 'lg')}</span><div style="flex:1"><b>${t(v.n)}</b><div class="sm muted"><span class="num">${v.pts}</span> pts</div></div><button class="btn sm ${s.points >= v.pts ? '' : 'ghost'}" data-v="${v.id}">${t('r.redeem')}</button></div>`).join('')}</div>
+      <div class="col">${VOUCH.map(v => `<div class="card" style="display:flex;align-items:center;gap:14px"><span class="lead" style="width:50px;height:50px;border-radius:16px;background:var(--f${v.id});display:grid;place-items:center;color:var(--brand)">${ic(v.ico, 'lg')}</span><div style="flex:1"><b>${t(v.n)}</b><div class="sm muted">${t('r.pts_n', { n: `<span class="num">${v.pts}</span>` })}</div></div><button class="btn sm ${s.points >= v.pts ? '' : 'ghost'}" data-v="${v.id}">${t('r.redeem')}</button></div>`).join('')}</div>
     </div>`, { tab: 'rewards', ctx });
   C.$$('[data-v]').forEach(b => b.addEventListener('click', () => { const v = VOUCH.find(x => x.id === +b.dataset.v); if (S().points < v.pts) { toast(t('r.need', { n: v.pts - S().points }), 'warning'); return; } store.set(x => { x.points -= v.pts; if (v.id === 1) x.plan.data.total += 0.5; if (v.id === 2) { x.bal += 500; x.tx.unshift({ id: C.uid(), k: 'cashback', n: '', amt: 500, ts: Date.now() }); } }); haptic([20, 30]); confetti(C.appEl(), 70, .7); toast(t('r.redeemed')); SCR.rewards([], { back: false }); }));
 };
 
 /* ------------------------------------------------------------------ profile / settings */
-SCR.me = (a, ctx) => {
-  if (a[0] === 'sim') return meSim(ctx); if (a[0] === 'limits') return meLimits(ctx); if (a[0] === 'about') return meAbout(ctx);
-  const s = S(), d = C.prefs();
-  page(`${topbar(t('me.h'))}
-    <div class="sec stagger">
-      <div class="pocket f2" style="display:flex;gap:14px;align-items:center">${s.avatar ? `<img src="${s.avatar}" alt="" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid var(--surface)">` : `<span class="lead" style="width:70px;height:70px;border-radius:50%;background:var(--surface);display:grid;place-items:center">${ic('user', 'xl')}</span>`}<div><div style="font:var(--dw) 21px/1.15 var(--display)">${esc(s.profile.name || s.name)}</div><div class="sm num" dir="ltr" style="opacity:.8">${msisdn(s.num)}</div><span class="badge ${s.kyc === 'std' ? 'ok' : 'warn'}" style="margin-top:6px">${ic('shield-check', 'sm')} ${t(s.kyc === 'std' ? 'me.kyc' : 'me.kyc_rev')}</span></div></div>
-      <div class="list">
-        <a class="item" href="#/rewards"><span class="lead f3">${ic('gift')}</span><div><div class="t">${t('m.t.rewards')}</div><div class="s">${t('m.points', { n: s.points })}</div></div><span class="chev end">${ic('chevron-right', 'flip')}</span></a>
-        <a class="item" href="#/me/sim"><span class="lead f2">${ic(s.sim === 'esim' ? 'esim' : 'sim')}</span><div><div class="t">${t('me.sim')}</div><div class="s">${t('me.sim_s')}</div></div><span class="chev end">${ic('chevron-right', 'flip')}</span></a>
-        <a class="item" href="#/me/limits"><span class="lead f1">${ic('chart-pie')}</span><div><div class="t">${t('me.limits')}</div></div><span class="chev end">${ic('chevron-right', 'flip')}</span></a>
-        <div class="item"><span class="lead f3">${ic('lock')}</span><div class="t" style="flex:1">${t('me.sec')}</div><button class="switch" id="bsw" role="switch" aria-checked="${s.bio}" aria-label="${t('ob.bio')}"></button></div>
-      </div>
-      <div class="list">
-        <div class="item" style="flex-direction:column;align-items:stretch;gap:10px"><div class="t">${ic('language', 'sm')} ${t('me.lang')}</div><div class="seg full">${['en', 'ar', 'fr'].map(l => `<button data-l="${l}" aria-pressed="${d.lang === l}" lang="${l}">${{ en: 'English', ar: 'العربية', fr: 'Français' }[l]}</button>`).join('')}</div></div>
-        <div class="item" style="flex-direction:column;align-items:stretch;gap:10px"><div class="t">${ic('sun', 'sm')} ${t('me.theme')}</div><div class="seg full"><button data-th="light" aria-pressed="${d.theme === 'light'}">${t('panel.light')}</button><button data-th="dark" aria-pressed="${d.theme === 'dark'}">${t('panel.dark')}</button></div><div id="looks-slot" class="card-picker"></div></div>
-        <div class="item" style="flex-direction:column;align-items:stretch;gap:8px"><div class="row"><span class="lead f2">${ic('download')}</span><div style="flex:1"><div class="t">${t('me.offline')}</div><div class="s">${t('me.offline_s')}</div></div></div><div class="bar" id="opb" style="height:8px;display:none"><i style="width:0%;animation:none;transition:width .3s"></i></div><button class="btn tonal sm" id="opk">${ic('download', 'sm')} ${t('me.offline')}</button></div>
-      </div>
-      <div class="list"><a class="item" href="#/me/about"><span class="lead">${ic('info')}</span><div class="t">${t('me.about')}</div><span class="chev end">${ic('chevron-right', 'flip')}</span></a>
-        <button class="item" data-act="replay"><span class="lead f2">${ic('refresh')}</span><div class="t">${t('me.replay')}</div></button><button class="item" data-act="reset"><span class="lead err">${ic('trash')}</span><div class="t">${t('me.reset')}</div></button></div>
-      <p class="legal">${t('me.signed')}</p>
-    </div>`, { ctx });
-  C.$$('[data-l]').forEach(b => b.addEventListener('click', () => C.setPrefs({ lang: b.dataset.l })));
-  C.$$('[data-th]').forEach(b => b.addEventListener('click', () => C.setPrefs({ theme: b.dataset.th })));
-  if (globalThis.Looks) globalThis.Looks.mount(C.$('#looks-slot'), { label: t('panel.look') });
-  C.$('#bsw').addEventListener('click', e => { store.set(x => { x.bio = !x.bio; }); e.currentTarget.setAttribute('aria-checked', S().bio); });
-  const op = C.$('#opk'); C.offlineReady().then(r => { if (r) { op.innerHTML = `${ic('success-check', 'sm')} OK`; op.disabled = true; } });
-  op.addEventListener('click', async () => { op.disabled = true; const b = C.$('#opb'); b.style.display = 'block'; await C.downloadOfflinePack(p => { b.firstChild.style.width = Math.round(p * 100) + '%'; }); op.innerHTML = `${ic('success-check', 'sm')} OK`; toast(t('me.offline')); });
-};
-C.actions.replay = () => { OBN.configure(OBCFG); store.set(s => { s.onboarded = false; }); go('ob/welcome'); };
-C.actions.reset = () => { store.reset(); OBN.configure(OBCFG); go('ob/welcome'); };
+const ST = SET.install({ page, S, store, avatar, markBig: lumoMark, op: OP, aboutKey: 'me.about_p', signout: () => { OBN.configure(OBCFG); store.set(s => { s.onboarded = false; }); C.reset('ob/welcome'); }, kyc: s => ({ ok: s.kyc === 'std', key: s.kyc === 'std' ? 'me.kyc' : 'me.kyc_rev' }),
+  notifs: [['n.1', 'gift', 'g2'], ['n.2', 'esim', 'g3'], ['n.3', 'bolt', 'g1']],
+  rows: link => `${link('rewards', 'f3', 'gift', 'm.t.rewards', t('m.points', { n: S().points }))}${link('cards', '', 'card', 'cd.h')}${link('me/sim', 'f2', S().sim === 'esim' ? 'esim' : 'sim', 'me.sim', t('me.sim_s'))}${link('me/limits', 'f1', 'chart-pie', 'me.limits')}${link('notifications', '', 'bell', 'n.title')}` });
+SCR.me = (a, ctx) => { if (a[0] === 'sim') return meSim(ctx); if (a[0] === 'limits') return meLimits(ctx); if (a[0] === 'about') return ST.about(ctx); ST.me(ctx); };
 function meSim(ctx) {
   const s = S();
   page(`${topbar(t('esim.h'))}<div class="sec stagger">
@@ -341,34 +320,40 @@ function meLimits(ctx) {
     <div class="list">${[['lim.daily', std ? 300000 : 50000], ['lim.monthly', std ? 2000000 : 300000], ['lim.max', std ? 1000000 : 200000]].map(([k, v]) => `<div class="item"><div class="t">${t(k)}</div><div class="end">${money(v, { short: true })}</div></div>`).join('')}</div>
     <p class="muted sm">${t('lim.up')}</p></div>`, { ctx });
 }
-function meAbout(ctx) { page(`${topbar(t('me.about'))}<div class="sec"><div class="pocket f3"><p>${t('me.about_p')}</p></div><div class="card"><p class="sm muted">Neptune Showroom · Polaris ${'1.0'}</p></div></div>`, { ctx }); }
-SCR.notifications = (a, ctx) => { page(`${topbar(t('n.title'))}<div class="sec"><div class="list">${[['n.1', 'gift', 'f3'], ['n.2', 'esim', 'f2'], ['n.3', 'bolt', 'f1']].map(([k, i, f], n) => `<div class="item"><span class="lead ${f}">${ic(i)}</span><div class="t" style="font-weight:600">${t(k)}</div><span class="end tiny muted">${n + 1}h</span></div>`).join('')}</div></div>`, { ctx }); };
+SCR.notifications = (a, ctx) => ST.notifications(ctx);
+
+/* vouchers */
+const V = VCH.install({ S, store, page, pinSheet, op: OP, contacts: CONTACTS, hero: heroTop, mark64: () => `<g transform="translate(-2 -1)">${markBody('#fff')}</g>`, own: ['#5A0D43', '#C21868'] });
+SCR.vouchers = (a, ctx) => V.screen(a, ctx);
 
 /* ------------------------------------------------------------------ boot */
+const scene = () => `<svg viewBox="0 0 360 270" role="img" aria-label="${t('ob.m.h')}"><defs><radialGradient id="wo" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#FFE9A8"/><stop offset=".55" stop-color="#FFB020"/><stop offset="1" stop-color="#FF7A2F"/></radialGradient><linearGradient id="wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity=".08"/></linearGradient></defs>
+  <g transform="translate(292 74)"><circle class="wl-ring" r="76" fill="none" stroke="#fff" stroke-width="2"/><circle class="wl-ring r2" r="76" fill="none" stroke="#fff" stroke-width="2"/><circle class="wl-ring r3" r="76" fill="none" stroke="#fff" stroke-width="2"/><circle r="64" fill="#FFB020" opacity=".18"/><circle r="46" fill="url(#wo)"/></g>
+  <g class="float"><g transform="translate(26 76) rotate(-7)"><rect width="226" height="140" rx="24" fill="url(#wg)" stroke="#fff" stroke-opacity=".5" stroke-width="1.5"/><rect x="20" y="22" width="44" height="34" rx="8" fill="#FFB020"/><path d="M20 39h44M42 22v34" stroke="#7A3A00" stroke-width="2" opacity=".5"/>
+    <g transform="translate(170 24)" fill="#fff">${[0, 1, 2, 3].map(i => `<rect x="${i * 9}" y="${22 - (i + 1) * 5}" width="6" height="${(i + 1) * 5}" rx="2"/>`).join('')}</g>
+    <text x="20" y="100" fill="#fff" style="font:700 21px 'Hanken Grotesk',sans-serif;letter-spacing:.04em" direction="ltr">+218 91 555 0142</text><text x="20" y="124" fill="#fff" opacity=".8" style="font:600 13px 'Hanken Grotesk',sans-serif">eSIM · 4G+</text></g></g>
+  <g class="float" style="animation-delay:-2.4s"><g transform="translate(150 196)"><rect width="186" height="54" rx="27" fill="#fff"/><circle cx="27" cy="27" r="17" fill="#FFB020"/><path d="M20 27l5 5 10-11" fill="none" stroke="#2A0F27" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><text x="54" y="24" fill="#5A0D43" style="font:700 12px 'Hanken Grotesk',sans-serif" opacity=".7">Lumo Pay</text><text x="54" y="42" fill="#2A0F27" style="font:800 17px 'Hanken Grotesk',sans-serif" direction="ltr">+ 25.00 LYD</text></g></g></svg>`;
 const OBCFG = {
-  id: 'mobile', op: OP, plans: PLANS,
-  art: () => `<svg viewBox="0 0 280 170" width="280" height="170" role="img" aria-label="${t('ob.m.h')}"><g style="color:var(--brand)"><rect x="92" y="6" width="96" height="158" rx="20" fill="none" stroke="currentColor" stroke-width="4"/><rect x="118" y="14" width="44" height="6" rx="3" fill="currentColor" opacity=".5"/>
-    <rect x="104" y="40" width="72" height="44" rx="12" style="fill:var(--accent)"/><text x="140" y="68" text-anchor="middle" style="fill:var(--on-accent);font:800 17px var(--display)">LUMO</text><rect x="104" y="96" width="72" height="8" rx="4" fill="currentColor" opacity=".5"/><rect x="104" y="112" width="46" height="8" rx="4" fill="currentColor" opacity=".3"/>
-    <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".55"><path d="M206 50a50 50 0 0 1 0 68"/><path d="M222 38a72 72 0 0 1 0 92"/><path d="M74 50a50 50 0 0 0 0 68"/><path d="M58 38a72 72 0 0 0 0 92"/></g></g></svg>`,
-  onSkip: () => { store.set(s => { s.onboarded = true; }); go('home'); },
+  id: 'lumo', op: OP, plans: PLANS, scene, feats: [['id-card', 'ob.f_id'], ['esim', 'ob.f_sim'], ['gift', 'ob.f_vch']],
+  account: () => S().acct ? { first: S().name, num: S().num, pin: S().pin, bio: S().bio, avatar: avatar() } : null,
+  onLogin: ob => { store.set(s => { s.onboarded = true; s.acct = true; if (ob) { s.pin = ob.pin; s.num = ob.phone; } }); C.reset('home'); },
   onFinish: ob => {
     store.set(s => {
-      s.onboarded = true; const p = ob.profile || {}; s.profile = { name: p.name || 'Nour El Huda Haddad' }; s.name = (p.name || 'Nour').split(' ')[0]; s.kyc = ob.kyc && ob.kyc.decision === 'accepted' ? 'std' : (ob.kyc ? 'basic' : 'std'); s.avatar = p.selfie || null;
+      s.onboarded = true; s.acct = true; s.hide = false; s.vouchers = []; const p = ob.profile || {}; s.profile = { name: p.name || 'Nour El Huda Haddad' }; s.name = (p.name || 'Nour').split(' ')[0]; s.kyc = ob.kyc && ob.kyc.decision === 'accepted' ? 'std' : (ob.kyc ? 'basic' : 'std'); s.avatar = p.selfie || null;
       s.num = ob.phone && ob.phone.length >= 13 ? ob.phone : OP.number; s.sim = ob.sim; s.pin = ob.pin || '1234'; s.bio = ob.bio; s.planId = ob.plan || 'flex'; s.points = 500; s.bal = 0;
-      const pl = { lite: [2, 50], flex: [10, 300], max: [30, 500] }[s.planId] || [10, 300]; s.plan = { data: { used: 0, total: pl[0] + 1 }, mins: { used: 0, total: pl[1] }, sms: { used: 0, total: 100 }, renews: Date.now() + 30 * DAY, auto: true };
+      const pl = { lite: [2, 50], flex: [10, 300], max: [30, 500] }[s.planId] || [10, 300]; s.plan = { data: { used: +(pl[0] * .31).toFixed(1), total: pl[0] + 1 }, mins: { used: Math.round(pl[1] * .22), total: pl[1] }, sms: { used: 9, total: 100 }, renews: Date.now() + 30 * DAY, auto: true };
       s.tx = [{ id: C.uid(), k: 'cashback', n: '', amt: 0, ts: Date.now() }].slice(0, 0); s.spend = [0, 0, 0, 0, 0, 0, 0]; s.missions = { bundles: 0, bill: 0, qr: 0, login: 1 }; s.streak = 1; s.bal = 25000;
-      s.tx.unshift({ id: C.uid(), k: 'fund', n: t('w.fund_a'), amt: 25000, ts: Date.now() });
+      s.tx.unshift({ id: C.uid(), k: 'fund', n: 'w.fund_a', amt: 25000, ts: Date.now() });
     });
-    go('home');
+    C.reset('home');
   },
 };
 function boot() {
-  C.applyPrefs();
-  C.shell({ id: 'mobile', title: { en: 'Neptune Mobile for Telco', ar: 'نبتون موبايل للاتصالات', fr: 'Neptune Mobile pour opérateurs' }, onPanel: a => { if (a === 'replay') C.actions.replay(); if (a === 'reset') C.actions.reset(); } });
+  C.shell({ id: 'lumo', op: OP, mark: lumoMark, themeColor: ['#5A0D43', '#2A0830'] });
   OBN.configure(OBCFG);
   C.onPrefs(() => { if (C.path() === 'ob/id' && OBN.onLangChange()) return; C.rerender(); });
   C.router(handle);
-  if (!sessionStorage.getItem('telco.mobile.splash') && !C.EMBED) { sessionStorage.setItem('telco.mobile.splash', '1'); C.splash(`<span class="opmark" style="font-size:34px;animation:tc-pop .8s var(--spring) both"><i style="width:54px;height:54px;font-size:30px;border-radius:18px">${OP.mark}</i>${esc(loc(OP.app))}</span>`, 1200); }
+  if (!sessionStorage.getItem('telco.lumo.splash')) { sessionStorage.setItem('telco.lumo.splash', '1'); C.splash(`<div class="rings"></div><span class="lockup">${lumoMark(64)}<b>${esc(loc(OP.app))}</b></span>`, 1200); }
   C.registerSW('../sw.js');
 }
 boot();

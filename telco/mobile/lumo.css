@@ -1,0 +1,65 @@
+/* Lumo Pay: raspberry-plum field with an amber glow. Magenta carries the primary action, amber is the light in the scene. Display face: Baloo 2. */
+:root[data-app=lumo]{
+  --dw:700;
+  --bg:#FBF6F9;--page:radial-gradient(120% 80% at 50% 0%,#F6E3EE,#EBD6E3 70%);--surface:#FFFFFF;--ink:#2A0F27;--muted:#6D5568;--line:#EFE1EA;
+  --brand:#B5135F;--on-brand:#FFFFFF;--focus:#B5135F;--accent:#FFB020;--on-accent:#2A0F27;--gold:#FFB020;
+  --hero:linear-gradient(158deg,#3A0A3E 0%,#7B1458 46%,#C21868 100%);
+  --hero2:linear-gradient(150deg,#1F0A24 0%,#4A1245 58%,#8B1A5E 100%);
+  --hero-glow:radial-gradient(120% 62% at 6% 108%,rgba(255,176,32,.55),transparent 62%),radial-gradient(70% 46% at 100% 0%,rgba(255,126,160,.32),transparent 70%);
+  --on-hero:#FFFFFF;--hero-ink:#5A0D43;
+  --cta:linear-gradient(135deg,#D01B6E,#B5135F);--cta-ink:#FFFFFF;--cta-glow:0 14px 28px -12px rgba(181,19,95,.7);
+  --f1:#FCE6F0;--f2:#FFF0D1;--f2i:#8F5A00;--f3:#DDF4F0;--f3i:#0B6F66;
+  --g1:#FCE6F0;--g1i:#B5135F;--g2:#FFEFC9;--g2i:#8F5A00;--g3:#DDF4F0;--g3i:#0B6F66;--g4:#EFE3F2;--g4i:#6A2A78;--g5:#FFE3DA;--g5i:#B03A1C;
+  --c-low:#F8EFF4;--c-mid:#F3E8EF;--c-high:#ECDDE6;--c-top:#E4D2DE;
+  --ok:#14623F;--ok-c:#DDF4E7;--err:#B5263D;--err-c:#FFE6EA;--warn:#7A5410;--warn-c:#FFF0CD;--info:#0B5F86;--info-c:#DDF1FA;
+  --glass:rgba(255,255,255,.14);--glass-line:rgba(255,255,255,.27);
+  --elev:0 1px 2px rgba(60,10,50,.05),0 12px 30px -14px rgba(90,15,70,.22);
+  --dock:rgba(255,255,255,.93);--dock-line:rgba(90,15,70,.08);--dock-ring:#FBF6F9;--dock-glow:0 18px 40px -16px rgba(90,15,70,.5);
+  --scrim:rgba(30,6,28,.55);--avatar:linear-gradient(135deg,#FFC24D,#FF8F3A);
+  --wl-cta:linear-gradient(135deg,#FFC24D,#FFA21A);--wl-cta-ink:#2A0F27;--sw-on:#B5135F;--chip-on:#3A0A3E;--chip-on-ink:#FFFFFF;
+  /* identity-check module reads these */
+  --look-brand:#B5135F;--look-on-brand:#fff;--look-accent:#FFB020;--look-on-accent:#2A0F27;--look-canvas:#FBF6F9;--look-surface:#fff;--look-ink:#2A0F27;--look-muted:#6D5568;--look-line:#EFE1EA;
+  --look-field-1:#FCE6F0;--look-field-2:#FFF0D1;--look-field-3:#DDF4F0;--look-r-control:16px;--look-r-pocket:24px;--look-font-display:"Baloo 2","Hanken Grotesk",sans-serif;--look-display-weight:700;
+}
+:root[data-app=lumo][data-odyssey-mode=dark]{
+  --bg:#150A19;--page:#0D060F;--surface:#22112B;--ink:#F9EBF3;--muted:#BBA3B6;--line:rgba(255,255,255,.1);
+  --brand:#FF7BB0;--on-brand:#2A0F27;--focus:#FF7BB0;
+  --hero:linear-gradient(158deg,#2A0830 0%,#5E0F47 50%,#9B1458 100%);--hero2:linear-gradient(150deg,#190820,#3C0F3A 58%,#6E1450);
+  --hero-glow:radial-gradient(120% 62% at 6% 108%,rgba(255,176,32,.38),transparent 62%),radial-gradient(70% 46% at 100% 0%,rgba(255,126,160,.2),transparent 70%);
+  --cta:linear-gradient(135deg,#D4206F,#B5135F);--cta-glow:0 14px 30px -10px rgba(212,32,111,.6);
+  --f1:#3A1A33;--f2:#3F2F12;--f2i:#FFC965;--f3:#123A37;--f3i:#6FE0D0;
+  --g1:#3E1A36;--g1i:#FF8FBE;--g2:#40300F;--g2i:#FFC965;--g3:#12403B;--g3i:#6FE0D0;--g4:#33193F;--g4i:#D9A8F0;--g5:#47231A;--g5i:#FF9F86;
+  --c-low:#1C0E23;--c-mid:#2B1735;--c-high:#38203F;--c-top:#46294F;
+  --ok:#6FD3A0;--ok-c:#123A29;--err:#FF9AA8;--err-c:#4A1A24;--warn:#F2C879;--warn-c:#3F3112;--info:#7FD0F5;--info-c:#123347;
+  --elev:0 0 0 1px rgba(255,255,255,.05),0 14px 32px -16px rgba(0,0,0,.7);
+  --dock:rgba(34,17,43,.92);--dock-line:rgba(255,255,255,.1);--dock-ring:#150A19;--dock-glow:0 18px 40px -16px rgba(0,0,0,.8);
+  --scrim:rgba(8,2,10,.66);--chip-on:#FF7BB0;--chip-on-ink:#2A0F27;--sw-on:#D4206F;
+  --look-brand:#FF7BB0;--look-on-brand:#2A0F27;--look-canvas:#150A19;--look-surface:#22112B;--look-ink:#F9EBF3;--look-muted:#BBA3B6;--look-line:rgba(255,255,255,.1);
+  --look-field-1:#3A1A33;--look-field-2:#3F2F12;--look-field-3:#123A37;
+}
+@media (min-width:560px){:root[data-app=lumo] body{background:var(--page)}}
+
+/* home */
+.lh .plan-t{margin-top:16px}
+.lh .plan-t h1{font:700 34px/1.05 var(--display);letter-spacing:-.015em}
+.lh .plan-t .eyebrow{opacity:.85;margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.lh .usage{margin-top:16px}
+.balchip{margin-top:12px;display:flex;align-items:center;gap:12px;min-height:64px;padding:8px 8px 8px 16px;border-radius:22px}
+[dir=rtl] .balchip{padding:8px 16px 8px 8px}
+.balchip .lbl{font:600 12px/1.1 var(--font);opacity:.85}
+.balchip .big-num{font-size:26px}
+.balchip .eye{margin-inline-start:auto;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;color:inherit}
+.hero-btn{margin-inline-start:auto;min-height:48px;padding:0 16px;border-radius:99px;font:700 13.5px var(--font);background:#fff;color:#5A0D43;display:inline-flex;align-items:center;gap:6px;box-shadow:0 10px 20px -10px rgba(0,0,0,.5)}
+.simplan{display:flex;flex-direction:column;gap:12px}
+.simplan .top{display:flex;align-items:center;gap:12px}
+.simplan h3{font:700 20px/1.1 var(--display)}
+.simplan .meta{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.bars4{vertical-align:-2px}
+.offer{display:flex;gap:14px;align-items:center;padding:16px;border-radius:var(--r-card);background:linear-gradient(120deg,#FFB020,#FF8A3D);color:#2A0F27;position:relative;overflow:hidden;isolation:isolate}
+.offer::before{content:"";position:absolute;inset:0;z-index:-1;color:#fff;background:repeating-radial-gradient(circle at 96% 10%,rgba(255,255,255,.28) 0 1.5px,transparent 1.5px 24px);-webkit-mask-image:radial-gradient(circle at 96% 10%,#000,transparent 80%);mask-image:radial-gradient(circle at 96% 10%,#000,transparent 80%)}
+.offer b{font:700 18px/1.15 var(--display)}.offer small{display:block;margin-top:2px;font-size:13px;opacity:.85}
+[dir=rtl] .offer::before{background:repeating-radial-gradient(circle at 4% 10%,rgba(255,255,255,.28) 0 1.5px,transparent 1.5px 24px)}
+.pass{width:272px;border-radius:var(--r-big);padding:18px;min-height:176px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(145deg,#FFC24D,#FF8F3A 60%,#E8505B);color:#2A0F27;position:relative;overflow:hidden;isolation:isolate;box-shadow:0 14px 30px -14px rgba(255,140,60,.8)}
+.pass::before{content:"";position:absolute;inset:0;z-index:-1;background:repeating-radial-gradient(circle at 100% 0%,rgba(255,255,255,.3) 0 1.5px,transparent 1.5px 24px);-webkit-mask-image:radial-gradient(circle at 100% 0%,#000,transparent 80%);mask-image:radial-gradient(circle at 100% 0%,#000,transparent 80%)}
+.pass .big-num{font-size:34px}
+:root[data-app=lumo]{--scan-bg:#12060F}

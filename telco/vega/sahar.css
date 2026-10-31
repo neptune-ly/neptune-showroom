@@ -1,0 +1,64 @@
+/* Sahar Cash: deep teal field with a sunrise-gold glow. Gold carries the primary action. Display face: Hanken Grotesk 800 (tight), where Lumo uses a round display. */
+:root[data-app=sahar]{
+  --display:"Bu","Hanken Grotesk",system-ui,sans-serif;--dw:800;
+  --bg:#F5F8F2;--page:radial-gradient(120% 80% at 50% 0%,#E2EFE6,#D4E4DA 70%);--surface:#FFFFFF;--ink:#0B2A2D;--muted:#52696B;--line:#E0E8E2;
+  --brand:#0A6B6F;--on-brand:#FFFFFF;--focus:#0A6B6F;--accent:#FFC23D;--on-accent:#2B1A00;--gold:#FFC23D;
+  --hero:linear-gradient(165deg,#03282D 0%,#06555B 52%,#0A7A74 100%);
+  --hero2:linear-gradient(150deg,#021F23 0%,#05434A 58%,#0A6B6F 100%);
+  --hero-glow:radial-gradient(90% 52% at 50% 114%,rgba(255,194,61,.62),transparent 62%),radial-gradient(60% 40% at 0% 0%,rgba(90,225,195,.2),transparent 70%);
+  --on-hero:#FFFFFF;--hero-ink:#05434A;
+  --cta:linear-gradient(135deg,#FFCB4A,#F2A512);--cta-ink:#2B1A00;--cta-glow:0 14px 28px -12px rgba(242,165,18,.8);
+  --f1:#DAF0EC;--f2:#FFF1CC;--f2i:#7A5200;--f3:#E7F1D6;--f3i:#3E6B12;
+  --g1:#D9F0EC;--g1i:#0A6B6F;--g2:#FFEFC2;--g2i:#7A5200;--g3:#E6F2D2;--g3i:#3F6B10;--g4:#FCE3D6;--g4i:#A8431C;--g5:#D8EAF2;--g5i:#1E5F7D;
+  --c-low:#F1F5EF;--c-mid:#ECF1EA;--c-high:#E3EAE1;--c-top:#D9E2D7;
+  --ok:#0F6A47;--ok-c:#D9F2E3;--err:#B5263D;--err-c:#FFE6EA;--warn:#7A5410;--warn-c:#FFF0CD;--info:#0B5F86;--info-c:#DDF1FA;
+  --glass:rgba(255,255,255,.13);--glass-line:rgba(255,255,255,.26);
+  --elev:0 1px 2px rgba(5,40,40,.05),0 12px 30px -14px rgba(5,60,60,.24);
+  --dock:rgba(255,255,255,.93);--dock-line:rgba(5,60,60,.09);--dock-ring:#F5F8F2;--dock-glow:0 18px 40px -16px rgba(5,60,60,.5);
+  --scrim:rgba(2,24,26,.55);--avatar:linear-gradient(135deg,#FFD166,#F2A512);
+  --sw-on:#0A6B6F;--chip-on:#05434A;--chip-on-ink:#FFFFFF;
+  --look-brand:#0A6B6F;--look-on-brand:#fff;--look-accent:#FFC23D;--look-on-accent:#2B1A00;--look-canvas:#F5F8F2;--look-surface:#fff;--look-ink:#0B2A2D;--look-muted:#52696B;--look-line:#E0E8E2;
+  --look-field-1:#DAF0EC;--look-field-2:#FFF1CC;--look-field-3:#E7F1D6;--look-r-control:16px;--look-r-pocket:24px;--look-font-display:"Hanken Grotesk",sans-serif;--look-display-weight:800;
+}
+:root[data-app=sahar][data-odyssey-mode=dark]{
+  --bg:#061A1C;--page:#030E10;--surface:#0D2A2D;--ink:#EAF6F2;--muted:#9FBAB6;--line:rgba(255,255,255,.1);
+  --brand:#4FD6C8;--on-brand:#04211F;--focus:#4FD6C8;
+  --hero:linear-gradient(165deg,#021A1E 0%,#04393F 52%,#08635F 100%);--hero2:linear-gradient(150deg,#031418,#06343A 58%,#0A5A5A);
+  --hero-glow:radial-gradient(90% 52% at 50% 114%,rgba(255,194,61,.4),transparent 62%),radial-gradient(60% 40% at 0% 0%,rgba(90,225,195,.12),transparent 70%);
+  --f1:#103A3A;--f2:#3D3010;--f2i:#FFD166;--f3:#1F3513;--f3i:#B5E37C;
+  --g1:#123E3E;--g1i:#6FE6D8;--g2:#3F3210;--g2i:#FFD166;--g3:#223A14;--g3i:#B5E37C;--g4:#44221A;--g4i:#FFA27F;--g5:#12333F;--g5i:#7FCBE8;
+  --c-low:#0A2124;--c-mid:#123237;--c-high:#1B3E43;--c-top:#264B50;
+  --ok:#6FD3A0;--ok-c:#123A29;--err:#FF9AA8;--err-c:#4A1A24;--warn:#F2C879;--warn-c:#3F3112;--info:#7FD0F5;--info-c:#123347;
+  --elev:0 0 0 1px rgba(255,255,255,.05),0 14px 32px -16px rgba(0,0,0,.7);
+  --dock:rgba(13,42,45,.92);--dock-line:rgba(255,255,255,.1);--dock-ring:#061A1C;--dock-glow:0 18px 40px -16px rgba(0,0,0,.8);
+  --scrim:rgba(0,10,12,.66);--chip-on:#4FD6C8;--chip-on-ink:#04211F;--sw-on:#0F8F89;
+  --look-brand:#4FD6C8;--look-on-brand:#04211F;--look-canvas:#061A1C;--look-surface:#0D2A2D;--look-ink:#EAF6F2;--look-muted:#9FBAB6;--look-line:rgba(255,255,255,.1);
+  --look-field-1:#103A3A;--look-field-2:#3D3010;--look-field-3:#1F3513;
+}
+@media (min-width:560px){:root[data-app=sahar] body{background:var(--page)}}
+html[data-app=sahar][dir=rtl]{--display:"Beiruti","Hanken Grotesk",sans-serif}
+:root[data-app=sahar] .big-num,:root[data-app=sahar] .wl h1{letter-spacing:-.03em}
+
+/* home */
+.sh .greet{margin-top:18px}
+.sh .greet small{display:block;font:500 15px var(--font);opacity:.85}
+.sh .big-num{font-size:52px;margin-top:4px}
+.sh .cashbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
+.sh .cashbtns .btn{min-height:58px;font-size:16.5px}
+.sh .eye{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;color:inherit;margin-inline-start:auto}
+.agrow{display:flex;align-items:center;gap:12px;padding:12px;border-radius:20px;background:var(--surface);box-shadow:var(--elev);transition:box-shadow .2s,background .2s;text-align:start;width:100%}
+.agrow.on{box-shadow:inset 0 0 0 2px var(--brand),var(--elev)}
+.agrow .no{width:46px;height:46px;border-radius:16px;display:grid;place-items:center;background:var(--f1);color:var(--brand);font:800 18px var(--display);flex:none}
+.agrow.on .no{background:var(--brand);color:var(--on-brand)}
+.agrow b{display:block;font-weight:700;font-size:15.5px;line-height:1.2}
+.agrow .m{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12.5px;color:var(--muted);margin-top:3px}
+.stars{display:inline-flex;align-items:center;gap:3px;font-weight:700;color:var(--ink)}
+.stars .ic{width:14px;height:14px;color:#E69B00}
+.open{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:var(--ok)}
+.open i{width:7px;height:7px;border-radius:50%;background:currentColor}
+.open.closing{color:var(--warn)}
+.pot{display:flex;align-items:center;gap:12px;min-width:236px;padding:14px;border-radius:20px;background:var(--surface);box-shadow:var(--elev)}
+.pot .bar{height:7px;margin-top:8px}
+.pot .bar>i{background:linear-gradient(90deg,var(--brand),#2FBF9F)}
+.agentcard{background:var(--hero2);color:#fff}
+:root[data-app=sahar]{--scan-bg:#031417}
