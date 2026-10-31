@@ -70,8 +70,8 @@ reg('voucher', ({ id }) => {
   };
 });
 
-const ticket = (b, v) => `<div class="ticket" style="--n:342px">${vl(b, 60)}<div class="tname">${bn(b)}</div><div class="tval num">${num(v.a, 0)} ${cur('LYD')} · ${tx(b.kind)}</div><div class="code num" id="vcode">${v.code}</div>
-  <button class="btn tonal sm" data-act="copycode" data-c="${v.code}" style="width:100%">${ic('copy', 's')}${t('Copy code')}</button><hr><div style="text-align:start;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--look-muted);margin-bottom:10px">${t('How to redeem')}</div><ol class="steps">${redeem(b).map(s => `<li>${esc(s)}</li>`).join('')}</ol></div>`;
+const ticket = (b, v) => `<div class="ticket" style="--n:342px">${vl(b, 60)}<div class="tname">${bn(b)}</div><div class="tval num">${num(Number(v.a), 0)} ${cur('LYD')} · ${tx(b.kind)}</div><div class="code num" id="vcode">${esc(v.code)}</div>
+  <button class="btn tonal sm" data-act="copycode" data-c="${esc(v.code)}" style="width:100%">${ic('copy', 's')}${t('Copy code')}</button><hr><div style="text-align:start;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--look-muted);margin-bottom:10px">${t('How to redeem')}</div><ol class="steps">${redeem(b).map(s => `<li>${esc(s)}</li>`).join('')}</ol></div>`;
 reg('voucher-done', ({ id, a, code, gift }) => {
   const b = vb(id);
   return {
@@ -88,7 +88,7 @@ A.copycode = b => { try { navigator.clipboard && navigator.clipboard.writeText(b
 /* ---------- my vouchers: purchased + ATM cash ---------- */
 const VCH = [{ code: '4829 7731', a: 200, s: 'a', h: 19 }, { code: '9013 4458', a: 50, s: 'r', h: 0 }];
 const mrow = v => { const b = vb(v.id), d = new Date(today); d.setDate(d.getDate() - v.d); return `<button class="row" data-act="vopen" data-i="${S.myv.indexOf(v)}">${vl(b, 46)}<div class="tx"><b>${bn(b)}</b><small>${dateLbl(d)} · ${v.gift ? t('Gift sent') : t('Ready to use')}</small></div><div class="end"><b class="num">${num(v.a, 0)}</b><small>${cur('LYD')}</small></div></button>` };
-const vrow = v => `<button class="row" data-act="vshow" data-c="${v.code}" data-a="${v.a}"><span class="tile ${v.s === 'a' ? 'f3' : 'ok'}">${ic(v.s === 'a' ? 'atm' : 'success-check')}</span><div class="tx"><b class="num">${v.code}</b><small>${v.s === 'a' ? t('Expires in {h}h', { h: v.h }) : t('Redeemed')}</small></div><div class="end"><b class="num">${num(v.a, 0)}</b><small>${cur('LYD')}</small></div></button>`;
+const vrow = v => `<button class="row" data-act="vshow" data-c="${esc(v.code)}" data-a="${Number(v.a)}"><span class="tile ${v.s === 'a' ? 'f3' : 'ok'}">${ic(v.s === 'a' ? 'atm' : 'success-check')}</span><div class="tx"><b class="num">${esc(v.code)}</b><small>${v.s === 'a' ? t('Expires in {h}h', { h: v.h }) : t('Redeemed')}</small></div><div class="end"><b class="num">${num(v.a, 0)}</b><small>${cur('LYD')}</small></div></button>`;
 reg('myvouchers', () => ({
   title: t('My vouchers'), right: `<button class="ibtn" data-act="newv" aria-label="${t('Create voucher')}">${ic('plus')}</button>`,
   body: `<div class="form" style="padding-bottom:6px"><div class="seg" id="mvs"><button data-t="d" aria-selected="true">${t('Digital')}</button><button data-t="c" aria-selected="false">${t('Cash at ATM')}</button></div></div><div id="mvb"></div>`,

@@ -271,7 +271,7 @@ reg('vdone', {
       <div class="succ-art"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring" cx="60" cy="60" r="52"/><path class="chk draw" pathLength="1" d="M36 62 54 80 86 42"/></svg></div>
       <h2 class="disp succ-t">${who ? t('vz_gifted', { n: esc(who) }) : t('vz_ready')}</h2>
       <article class="ticket"><span class="tk-a">${v.art}</span><div class="tk-v"><span><b class="disp" style="font-size:18px">${v.name}</b><br><small>${t('vz_value')}</small></span><b class="disp">${money(val)}</b></div><div class="rc-cut"><i></i><b></b><i></i></div>
-        <div class="tk-c"><small>${t('vz_code')}</small><b class="mono code">${who ? 'VG••-••••-••••' : code}</b>${who ? `<small>${t('vz_masked', { n: esc(who) })}</small>` : `<button class="btn tonal sm" data-copy="${code}">${ic('copy', 'sm')} ${t('copy_code')}</button>`}</div></article>
+        <div class="tk-c"><small>${t('vz_code')}</small><b class="mono code">${who ? 'VG••-••••-••••' : esc(code)}</b>${who ? `<small>${t('vz_masked', { n: esc(who) })}</small>` : `<button class="btn tonal sm" data-copy="${esc(code)}">${ic('copy', 'sm')} ${t('copy_code')}</button>`}</div></article>
       ${who ? '' : `<section class="rows plain"><div class="gl">${t('vz_redeem')}</div>${['vz_r1', 'vz_r2', 'vz_r3'].map((k, i) => `<div class="lr"><span class="lri num">${i + 1}</span><span class="lt"><b>${t(k, { b: v.name })}</b></span></div>`).join('')}</section>`}</div>
       <footer class="foot"><button class="btn block lg" data-home>${t('go_home')}</button><button class="btn tonal block" data-go="activity">${ic('receipt', 'sm')} ${t('view_receipt')}</button></footer>`;
   }
