@@ -8,6 +8,8 @@ export const R = { stack: [], tabs: ['home', 'accounts', 'cards', 'more'] };
 const rtl = () => document.documentElement.dir === 'rtl';
 let view, nav, appEl;
 const seen = new Set(); const q = new URLSearchParams(location.search);
+// Test hooks (?go=, ?auth=1, window.NM) only answer on a local dev server with ?dev=1; store builds never pass the flag.
+const DEV = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname) && location.protocol === 'http:' && q.get('dev') === '1';
 
 L([['Home', 'Accueil', 'الرئيسية'], ['Accounts', 'Comptes', 'الحسابات'], ['Pay', 'Payer', 'ادفع'], ['Cards', 'Cartes', 'البطاقات'], ['More', 'Plus', 'المزيد'], ['Back', 'Retour', 'رجوع'], ['Wallet', 'Portefeuille', 'المحفظة']]);
 
@@ -41,7 +43,8 @@ export function renderNav() {
 
 /* ---------- navigation ---------- */
 export function go(name, p, o = {}) {
-  const el = build(name, p); const prev = R.stack[R.stack.length - 1]; R.stack.push(el); view.append(el);
+  const cur = R.stack[R.stack.length - 1]; if (cur && cur.dataset.name === name && performance.now() - cur._t < 600) return cur; // double tap
+  const el = build(name, p); el._t = performance.now(); const prev = cur; R.stack.push(el); view.append(el); syncHist();
   const s = rtl() ? -1 : 1; const D = o.instant ? 1 : dur();
   setNav(el._def.nav);
   if (prev && !o.instant) {
@@ -52,21 +55,38 @@ export function go(name, p, o = {}) {
   haptic(6); return el;
 }
 export function back() {
-  if (R.stack.length < 2) return; const el = R.stack.pop(), prev = R.stack[R.stack.length - 1]; const s = rtl() ? -1 : 1;
+  if (R.stack.length < 2) return; const el = R.stack.pop(), prev = R.stack[R.stack.length - 1]; const s = rtl() ? -1 : 1; syncHist();
   prev.style.visibility = ''; setNav(prev._def.nav);
   anim(prev, [{ transform: `translateX(${-24 * s}%)`, opacity: .6 }, { transform: 'none', opacity: 1 }], { duration: dur() });
   anim(el, [{ transform: 'none' }, { transform: `translateX(${100 * s}%)` }], { duration: dur() * .8, easing: 'cubic-bezier(.3,0,.2,1)' }).finished.then(() => el.remove());
   haptic(6);
 }
-export function backTo(name) { while (R.stack.length > 1 && R.stack[R.stack.length - 1].dataset.name !== name) { const e = R.stack.pop(); e.remove() } const t0 = R.stack[R.stack.length - 1]; t0.style.visibility = ''; setNav(t0._def.nav) }
+export function backTo(name) { while (R.stack.length > 1 && R.stack[R.stack.length - 1].dataset.name !== name) { const e = R.stack.pop(); e.remove() } const t0 = R.stack[R.stack.length - 1]; t0.style.visibility = ''; setNav(t0._def.nav); syncHist() }
 export function tab(name, o = {}) {
-  const old = [...R.stack]; R.stack = []; const el = build(name, {}); R.stack.push(el); view.append(el); setNav(el._def.nav);
+  const old = [...R.stack]; R.stack = []; const el = build(name, {}); R.stack.push(el); view.append(el); setNav(el._def.nav); syncHist();
   if (!o.instant && old.length) { anim(el, [{ opacity: 0, transform: 'scale(.97)' }, { opacity: 1, transform: 'none' }], { duration: 480 }); old.forEach(e => anim(e, [{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' }).finished.then(() => e.remove())) } else old.forEach(e => e.remove());
   setTimeout(() => { el._swap ? el._swap() : el._ready() }, el._swap ? 700 : 60); return el;
 }
 export const top = () => R.stack[R.stack.length - 1];
 export function rerender() { // language / look changes: rebuild every stacked screen in place
   renderNav(); R.stack.forEach((el, i) => { const n = el.dataset.name, p = JSON.parse(el.dataset.p); const sc0 = $('.scroll', el).scrollTop; const nw = build(n, p); nw.style.visibility = el.style.visibility; el.replaceWith(nw); R.stack[i] = nw; nw._def.skel && seen.add(n); const s = $('.scroll', nw); s.innerHTML = nw._def.body; nw._ready(); s.scrollTop = sc0 }); const tp = top(); if (tp) setNav(tp._def.nav) }
+
+/* ---------- system back (Android): one guard history entry while there is something to go back to ---------- */
+let guard = false, skip = false;
+function syncHist() {
+  if (skip) return;
+  const need = R.stack.length > 1 || !!$('.sheet', appEl);
+  if (need && !guard) { history.pushState({ nm: 1 }, ''); guard = true }
+  else if (!need && guard) { guard = false; skip = true; history.back() }
+}
+addEventListener('popstate', () => {
+  if (skip) { skip = false; return syncHist() }
+  guard = false;
+  const sc = $$('.scrim', appEl).pop();
+  if (sc) return sc.click(); // the sheet's removal re-syncs
+  back(); syncHist();
+});
+document.addEventListener('nm:sheet', () => syncHist());
 
 /* ---------- global events ---------- */
 function bindGlobal() {
@@ -77,6 +97,7 @@ function bindGlobal() {
     const tt = e.target.closest('[data-tabgo]'); if (tt) { tab(tt.dataset.tabgo); return }
     const a = e.target.closest('[data-act]'); if (a && A[a.dataset.act]) { haptic(8); A[a.dataset.act](a, e) }
   });
+  appEl.addEventListener('submit', e => e.preventDefault());
   appEl.addEventListener('pointerdown', e => { if (e.target.closest('.btn,.row,.chip,.ibtn,.qa,.nav button,.tile-btn')) haptic(4) });
 }
 
@@ -101,9 +122,9 @@ export async function boot() {
   view = $('#view', appEl); nav = $('.nav', appEl); nav.dataset.on = '0'; renderNav(); bindGlobal();
   applyTheme(S.theme);
   const go0 = q.get('go');
-  if (q.get('auth') === '1' || go0) { S.authed = true; if (go0) { const [r, pj] = go0.split('@'); await jump0(r, pj) } else tab('home', { instant: true }) }
+  if (DEV && (q.get('auth') === '1' || go0)) { S.authed = true; if (go0) { const [r, pj] = go0.split('@'); await jump0(r, pj) } else tab('home', { instant: true }) }
   else tab('login', { instant: true });
   if ('serviceWorker' in navigator && !q.get('nosw') && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
-  window.NM = { go, back, tab, jump, S, MISSING, R };
+  if (DEV) window.NM = { go, back, tab, jump, S, MISSING, R };
 }
 async function jump0(r, pj) { const p = pj ? JSON.parse(decodeURIComponent(pj)) : {}; const tabs = R.tabs; if (tabs.includes(r)) tab(r, { instant: true }); else { tab(p.root || 'home', { instant: true }); go(r, p, { instant: true }) } }

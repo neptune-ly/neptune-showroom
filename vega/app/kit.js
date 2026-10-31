@@ -1,5 +1,5 @@
 // App kit: store, router (stack + tabs), sheets, toast, PIN step-up, keypad, success screen.
-import { st, t, add, esc, ic, money, moneyT, numT, RM, runCounts, confetti } from '../assets/core.js';
+import { st, t, add, esc, ic, money, moneyT, numT, RM, runCounts, confetti, LS } from '../assets/core.js';
 import { vegaStar } from './brand.js';
 
 export const SCR = {};
@@ -8,9 +8,9 @@ export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 export const nm = o => (o && typeof o === 'object') ? (st.lang === 'ar' ? o.ar : o.en) : o;
 export const stack = [];
-export const store = { hideBal: false, motion: true, tab: 'home', lastRef: 0, mode: 'personal', wallet: 0 };
-try { const q = new URLSearchParams(location.search).get('mode'); if (q === 'business' || q === 'personal') store.mode = q; else if (localStorage.getItem('vega.app.mode') === 'business') store.mode = 'business'; } catch (e) {}
-export const setMode = m => { store.mode = m; try { localStorage.setItem('vega.app.mode', m); } catch (e) {} };
+export const store = { hideBal: LS.get('vega.app.hide') === '1', motion: true, tab: 'home', lastRef: 0, mode: 'personal', wallet: 0 };
+LS.del('vega.app.mode'); // Business mode is not offered in this release; release anyone a previous build left in it.
+export const setHide = v => { store.hideBal = v; LS.set('vega.app.hide', v ? '1' : '0'); };
 export const wait = ms => new Promise(r => setTimeout(r, RM() ? Math.min(ms, 30) : ms));
 export const vp = () => $('#vp');
 export const phone = () => $('#phone');
@@ -50,6 +50,7 @@ function mountScr(el, name, p, first = true) {
 }
 export function go(name, p = {}, { replaceTop = false } = {}) {
   const def = SCR[name]; if (!def) { console.error('no screen', name); return; }
+  const cur = stack[stack.length - 1]; if (!replaceTop && cur && cur.name === name && performance.now() - cur.t < 600) return cur.el; // double tap
   closeSheet();
   const el = document.createElement('section');
   el.className = 'scr ' + (def.tab ? 'tabroot' : 'enter'); el.dataset.name = name;
@@ -57,7 +58,7 @@ export function go(name, p = {}, { replaceTop = false } = {}) {
   render(el, name, p);
   const prev = stack[stack.length - 1];
   if (replaceTop && prev) { prev.el.remove(); stack.pop(); }
-  vp().appendChild(el); stack.push({ name, p, el });
+  vp().appendChild(el); stack.push({ name, p, el, t: performance.now() });
   if (prev && !replaceTop) { prev.el.classList.add('under'); prev.el.inert = true; }
   syncChrome();
   mountScr(el, name, p);
@@ -74,8 +75,24 @@ export function back() {
   setTimeout(() => top.el.remove(), RM() ? 10 : DUR - 100);
   syncChrome();
 }
+
+/* ---------- system back (Android): one guard history entry while there is something to go back to ---------- */
+let guard = false, skip = false;
+export function syncHist() {
+  if (skip) return;
+  const need = stack.length > 1 || !!$('.sheet');
+  if (need && !guard) { history.pushState({ vg: 1 }, ''); guard = true; }
+  else if (!need && guard) { guard = false; skip = true; history.back(); }
+}
+addEventListener('popstate', () => {
+  if (skip) { skip = false; return syncHist(); }
+  guard = false;
+  if ($('.sheet')) closeSheet(); else back();
+  syncHist();
+});
 export function tab(name) {
   closeSheet();
+  if (name === 'home') LS.del('vega.app.out'); // reaching Home means signed in
   store.tab = name;
   const old = stack.splice(0);
   old.forEach(o => { o.el.classList.add('fadeout'); setTimeout(() => o.el.remove(), RM() ? 10 : 220); });
@@ -84,6 +101,7 @@ export function tab(name) {
 }
 export function resetToHome() { tab('home'); }
 function syncChrome() {
+  syncHist();
   const top = stack[stack.length - 1]; if (!top) return;
   const def = SCR[top.name];
   const ph = phone();
@@ -122,13 +140,14 @@ export function sheet(html, { onClose, cls = '', re } = {}) {
   sh.innerHTML = `<div class="grab"></div>${html}`; sh._onClose = onClose; sh._re = re;
   phone().append(sc, sh);
   requestAnimationFrame(() => { sc.classList.add('on'); sh.classList.add('on'); });
+  syncHist();
   return sh;
 }
 export function closeSheet(quick) {
   const sh = $('.sheet'), sc = $('.scrim'); if (!sh) return;
   const cb = sh._onClose; sh._onClose = null;
-  if (quick) { sh.remove(); sc?.remove(); }
-  else { sh.classList.remove('on'); sc?.classList.remove('on'); setTimeout(() => { sh.remove(); sc?.remove(); }, 320); }
+  if (quick) { sh.remove(); sc?.remove(); syncHist(); }
+  else { sh.classList.remove('on'); sc?.classList.remove('on'); setTimeout(() => { sh.remove(); sc?.remove(); syncHist(); }, 320); }
   cb && cb();
 }
 export function toast(msg, icon = 'success-check') {
@@ -194,7 +213,7 @@ export function bindGlobal() {
     const g = e.target.closest('[data-go]');
     if (g) { let p = {}; try { p = JSON.parse(g.dataset.p || '{}'); } catch (x) {} if (g.dataset.go === 'home') return tab('home'); if (SCR[g.dataset.go]?.tab) return tab(g.dataset.go); return go(g.dataset.go, p); }
     if (e.target.closest('[data-back]')) return back();
-    const tb = e.target.closest('[data-tab]'); if (tb) { if (tb.dataset.tab === 'scan' || tb.dataset.tab === 'pos') return go(tb.dataset.tab); return tab(tb.dataset.tab); }
+    const tb = e.target.closest('[data-tab]'); if (tb) { if (tb.dataset.tab === 'scan') return go(tb.dataset.tab); return tab(tb.dataset.tab); }
     if (e.target.closest('[data-home]')) return tab('home');
     if (e.target.closest('[data-scrim]')) return closeSheet();
     const cl = e.target.closest('[data-close]'); if (cl) return closeSheet();
@@ -210,9 +229,7 @@ export function rebuildTabbar() {
   const hidden = $('#phone').classList.contains('notabs');
   const it = (id, icon, key) => `<button class="tbi" data-tab="${id}" aria-label="${t(key)}" aria-current="${store.tab === id && !hidden}"><span class="tbi-ic">${ic(icon)}</span><span class="tbi-l">${t(key)}</span></button>`;
   const mid = (id, icon, key) => `<button class="tbi tbi-mid" data-tab="${id}" aria-label="${t(key)}"><span class="tbi-ic">${ic(icon, 'lg')}</span></button>`;
-  tb.innerHTML = store.mode === 'business'
-    ? it('home', 'home', 'tab_home') + it('orders', 'receipt', 'b_orders') + mid('pos', 'contactless', 'b_charge') + it('me', 'user', 'tab_me')
-    : it('home', 'home', 'tab_home') + it('wallets', 'wallet', 'tab_wallets') + mid('scan', 'qr-code', 'tab_scan') + it('activity', 'statement', 'tab_activity') + it('me', 'user', 'tab_me');
+  tb.innerHTML = it('home', 'home', 'tab_home') + it('wallets', 'wallet', 'tab_wallets') + mid('scan', 'qr-code', 'tab_scan') + it('activity', 'statement', 'tab_activity') + it('me', 'user', 'tab_me');
 }
 
 /* ---------- slide to confirm + processing overlay ---------- */

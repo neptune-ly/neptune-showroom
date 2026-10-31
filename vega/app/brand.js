@@ -7,6 +7,5 @@ export const vegaLogo = (cls = '') => `<span class="vlogo ${cls}"><span class="v
 // Same decorative QR as the shared helper, with the Vega star in the centre.
 export const qrV = (seed, o = {}) => {
   const n = o.n || 29, c = n / 2;
-  const svg = qrSvg(seed, o).replace(/<g transform="translate\([^"]*\)"><rect[\s\S]*<\/g>/, `<g transform="translate(${c} ${c}) scale(.05)"><rect x="-50" y="-50" width="100" height="100" rx="26" fill="var(--look-brand)"/><g fill="#fff" transform="scale(.62)"><path d="${LONG}"/><path d="${LONG}" transform="rotate(45) scale(.64)"/></g></g>`);
-  return svg.replace('QR code (simulated)', 'QR code');
+  return qrSvg(seed, o).replace(/<g transform="translate\([^"]*\)"><rect[\s\S]*<\/g>/, `<g transform="translate(${c} ${c}) scale(.05)"><rect x="-50" y="-50" width="100" height="100" rx="26" fill="var(--look-brand)"/><g fill="#fff" transform="scale(.62)"><path d="${LONG}"/><path d="${LONG}" transform="rotate(45) scale(.64)"/></g></g>`);
 };

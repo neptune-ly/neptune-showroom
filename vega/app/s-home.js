@@ -118,7 +118,7 @@ reg('notifs', {
       const d = new Date(); d.setDate(d.getDate() - n.d);
       return row({ lead: `<span class="lead f${(i % 3) + 1}">${ic(n.ic)}</span>`, title: `<span style="font-weight:${n.unread ? 700 : 500}">${t(n.k, o)}</span>`, sub: `${dayLabel(d)} · <span class="num">${String(n.h).padStart(2, '0')}:00</span>`, end: n.unread ? '<i class="udot"></i>' : '', cls: n.unread ? 'unr' : '' });
     }).join('');
-    return scr(`<div class="list rise">${body}</div>`, { head: hdr(t('n_title'), { right: `<button class="btn text sm" data-act="mark">${t('n_mark')}</button>` }) });
+    return scr(`<div class="list rise">${body}</div>`, { head: hdr(t('n_title'), { right: `<button class="iconbtn" data-act="mark" aria-label="${t('n_mark')}">${ic('success-check')}</button>` }) });
   },
   mount(el) { el.addEventListener('click', e => { if (e.target.closest('[data-act=mark]')) { NOTIFS.forEach(n => n.unread = 0); refresh(); toast(t('saved_toast')); } }); }
 });

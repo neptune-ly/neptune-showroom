@@ -2,7 +2,7 @@
 import { st, t, add, ic, esc, money, moneyT, numT, tenantName, fmtDate, fmtTime, BASE, RM } from '../assets/core.js';
 import { qrV as qrSvg } from './brand.js';
 
-import { SCR, reg, hdr, scr, avatar, nm, store, setMode, go, tab, back, sheet, closeSheet, toast, pin, keypadHtml, bindKeypad, toMinor, amtDisplay, processing, showSuccess, refNo, wait, rebuildTabbar, refresh, rerender, switchEl, $, $$ } from './kit.js';
+import { SCR, reg, hdr, scr, avatar, nm, store, go, tab, back, sheet, closeSheet, toast, pin, keypadHtml, bindKeypad, toMinor, amtDisplay, processing, showSuccess, refNo, wait, rebuildTabbar, refresh, rerender, switchEl, $, $$ } from './kit.js';
 import { S, ME, whoName, CONTACTS, person } from './data.js';
 import { txnRow, TYPE } from './s-home.js';
 
@@ -98,13 +98,11 @@ reg('me', {
     const biz = store.mode === 'business';
     return `${hdr(t('me_title'), { back: false })}<div class="body">
       <div class="prof2">${avatar(biz ? t('me_name_b') : nm(ME), 0, 'big')}<div><b>${biz ? t('me_name_b') : esc(nm(ME))}</b><small><span class="ltr">${ME.handle}</span> · <span class="num">${ME.phone}</span></small></div></div>
-      <div class="gl">${t('me_mode')}</div><div class="seg" id="mode"><button aria-selected="${!biz}" data-m="personal">${t('b_pers')}</button><button aria-selected="${biz}" data-m="business">${t('b_biz')}</button></div><p class="small muted">${t('b_mode_s')}</p>
-      ${grp(t('me_acct'), row('limits', 'id-card', 'me_id', 'tier1') + row('cards', 'card', 'sv_cards') + row('statements', 'statement', 'sv_stm') + row('rewards', 'star', 'sv_rw'))}
+            ${grp(t('me_acct'), row('limits', 'id-card', 'me_id', 'tier1') + row('cards', 'card', 'sv_cards') + row('statements', 'statement', 'sv_stm') + row('rewards', 'star', 'sv_rw'))}
       ${grp(t('me_prefs'), row('security', 'security-shield', 'me_sec') + row('settings', 'settings', 'me_set') + row('notifs', 'bell', 'notifs'))}
       ${grp(t('me_help'), row('support', 'chat', 'me_sup') + row('help', 'info', 'me_faq') + row('lock', 'logout', 'me_out'))}
       <p class="tiny muted center">Neptune Vega</p></div>`;
   },
-  mount(el) { el.addEventListener('click', e => { const m = e.target.closest('[data-m]'); if (m && m.dataset.m !== store.mode) { setMode(m.dataset.m); store.tab = 'home'; tab('home'); rebuildTabbar(); } }); }
 });
 
 /* ---------- Orders (business) ---------- */

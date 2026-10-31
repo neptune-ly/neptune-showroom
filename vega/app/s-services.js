@@ -3,6 +3,7 @@ import { st, t, add, ic, esc, money, moneyT, numT, countUp, ring, fmtDate, confe
 import { qrV as qrSvg } from './brand.js';
 
 import { reg, hdr, scr, row, sectionHead, avatar, nm, go, tab, sheet, closeSheet, toast, pin, keypadHtml, bindKeypad, toMinor, amtDisplay, slideHtml, bindSlide, processing, showSuccess, refNo, switchEl, wait, $, $$, rerender, refresh } from './kit.js';
+import { voucher } from './glyphs.js';
 import { S, BILLERS, TELCOS, MERCH, CONTACTS, biller, telco, merchant, addTxn, person } from './data.js';
 
 add({
@@ -82,8 +83,8 @@ reg('airtime', {
     const op = el._op || 'o1', md = el._md || 'air', pick = el._pk ?? (md === 'air' ? 1 : 1);
     const opts = md === 'air' ? AIR.map((v, i) => `<button class="amtile ${pick === i ? 'on' : ''}" data-pk="${i}"><b class="disp">${numT(v / 100)}</b><span class="tiny">${st.cur}</span>${i === 3 ? `<em>${t('at_bonus', { p: 10 })}</em>` : ''}</button>`).join('')
       : DATA.map((d, i) => `<button class="amtile wide ${pick === i ? 'on' : ''}" data-pk="${i}"><b class="disp"><span class="num">${t('at_gb', { g: d[0] })}</span></b><span class="tiny">${t('at_valid', { d: d[1] })}</span><span class="b">${money(d[2])}</span></button>`).join('');
-    return scr(`<div class="muted small b grp">${t('at_op')}</div><div class="ops rise">${TELCOS.map(o => `<button class="op h${o.hue} ${op === o.id ? 'on' : ''}" data-op="${o.id}"><span class="opd"></span>${esc(nm(o))}</button>`).join('')}</div>
-      <div class="field rise"><label>${t('at_num')}</label><div class="inp row" style="gap:10px"><span class="num sp b">+000 91 555 0142</span><button class="iconbtn" data-go="send" aria-label="Contacts">${ic('users', 'sm')}</button></div></div>
+    return scr(`<div class="muted small b grp">${t('at_op')}</div><div class="ops rise">${TELCOS.map((o, i) => `<button class="op h${o.hue} ${op === o.id ? 'on' : ''}" data-op="${o.id}"><span class="opd">${voucher(['pulse', 'aurora', 'nimbus'][i]).art}</span>${esc(nm(o))}</button>`).join('')}</div>
+      <div class="field rise"><label>${t('at_num')}</label><div class="inp row" style="gap:10px"><span class="num sp b">+218 91 555 0142</span><button class="iconbtn" data-go="send" aria-label="Contacts">${ic('users', 'sm')}</button></div></div>
       <div class="seg rise"><button aria-selected="${md === 'air'}" data-md="air">${t('at_air')}</button><button aria-selected="${md === 'data'}" data-md="data">${t('at_data')}</button></div>
       <div class="muted small b grp">${t('at_pick')}</div><div class="amgrid ${md}">${opts}</div>`, { head: hdr(t('at_title')), foot: slideHtml(t('at_slide'), 'phone') });
   },
@@ -95,7 +96,7 @@ reg('airtime', {
     bindSlide(el, () => pin(async () => {
       const md = el._md || 'air', i = el._pk ?? 1, amt = md === 'air' ? AIR[i] : DATA[i][2]; await processing(); const ref = refNo('AT');
       const x = addTxn({ type: 'airtime', who: el._op || 'o1', amt: -amt, cat: 'bills', ref });
-      showSuccess({ title: t('at_done'), amountMinor: amt, rows: [[t('to'), '<span class="num">+000 91 555 0142</span>'], [t('at_op'), esc(nm(telco(el._op || 'o1')))], [t('ref'), `<span class="mono">${ref}</span>`]], actions: `<button class="btn block lg" data-home>${t('go_home')}</button>` });
+      showSuccess({ title: t('at_done'), amountMinor: amt, rows: [[t('to'), '<span class="num">+218 91 555 0142</span>'], [t('at_op'), esc(nm(telco(el._op || 'o1')))], [t('ref'), `<span class="mono">${ref}</span>`]], actions: `<button class="btn block lg" data-home>${t('go_home')}</button>` });
     }));
   }
 });

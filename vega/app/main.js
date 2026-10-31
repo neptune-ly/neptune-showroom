@@ -1,5 +1,5 @@
-import { boot, st, t, onChange, setLang, setTheme, RM } from '../assets/core.js';
-import { setMode, $, go, tab, bindGlobal, rebuildTabbar, rerenderAll } from './kit.js';
+import { boot, st, t, onChange, setLang, setTheme, RM, LS } from '../assets/core.js';
+import { $, go, tab, bindGlobal, rebuildTabbar, rerenderAll, SCR } from './kit.js';
 import { vegaStar } from './brand.js';
 import './s-home.js';
 import './s-pay.js';
@@ -12,6 +12,7 @@ import './s-calm2.js';
 import './s-vega.js';
 
 boot({ product: 'app', defaultLook: 'vibrant' });
+st.tenant = 'Vega';
 
 function splash() {
   const sp = $('#splash'); if (!sp) return;
@@ -24,10 +25,13 @@ function splash() {
 const q = new URLSearchParams(location.search);
 document.getElementById('stage').innerHTML = `<div class="phone" id="phone"><div id="vp"></div><nav class="tb" aria-label="Main"></nav><div id="splash"></div></div>`;
 rebuildTabbar(); bindGlobal();
-tab('home');
+const out = LS.get('vega.app.out') === '1';
+tab(out ? 'welcome' : 'home');
 if (q.get('splash') !== '0') splash();
+// Shortcut links (?go=) may only open screens that need no parameters; anything else lands on Home.
+const START = ['wallets', 'activity', 'me', 'cards', 'vouchers', 'pockets', 'insights', 'rewards', 'referrals', 'bills', 'airtime', 'exchange', 'scheduled', 'statements', 'limits', 'support', 'help', 'settings', 'security', 'notifs', 'cashin', 'send', 'request', 'receive', 'scan', 'split', 'kyc'];
 const start = q.get('go');
-if (start) setTimeout(() => { tab('home'); let p = {}; try { p = JSON.parse(q.get('p') || '{}'); } catch (e) {} go(start, p); }, 300);
+if (start && !out && START.includes(start)) setTimeout(() => SCR[start].tab ? tab(start) : go(start), 300);
 
 onChange(() => { rerenderAll(); });
 
@@ -40,10 +44,9 @@ addEventListener('message', e => {
   const r = document.documentElement;
   custom.forEach(k => r.style.removeProperty(k)); custom = [];
   Object.entries(d.vars || {}).forEach(([k, v]) => { r.style.setProperty(k, v); custom.push(k); });
-  if ('tenant' in d) st.tenant = d.tenant || '';
+  if ('tenant' in d) st.tenant = d.tenant || 'Vega';
   if (d.lang && d.lang !== st.lang) setLang(d.lang);
   if (d.theme && d.theme !== st.theme) setTheme(d.theme);
-  if (d.mode) { setMode(d.mode); rebuildTabbar(); }
   if (d.go) { tab('home'); setTimeout(() => go(d.go, d.p || {}), 60); }
   if (d.tab) tab(d.tab);
   if (d.splash) splash();

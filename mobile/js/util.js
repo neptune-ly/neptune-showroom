@@ -4,11 +4,12 @@ export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 export const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const ls = { g(k) { try { return localStorage.getItem(k) } catch (e) { return null } }, s(k, v) { try { localStorage.setItem(k, v) } catch (e) {} } };
 const q = new URLSearchParams(location.search);
+const ok = (v, list) => list.includes(v) ? v : null;
 
 /* ---------- state ---------- */
 export const S = {
-  lang: q.get('lang') || ls.g('nm.lang') || 'en',
-  theme: q.get('theme') || ls.g('nm.theme') || 'light',
+  lang: ok(q.get('lang'), ['en', 'fr', 'ar']) || ok(ls.g('nm.lang'), ['en', 'fr', 'ar']) || 'en',
+  theme: ok(q.get('theme'), ['light', 'dark']) || ok(ls.g('nm.theme'), ['light', 'dark']) || 'light',
   hide: ls.g('nm.hide') === '1',
   authed: false, frozen: {}, tok: { apple: true, google: false, samsung: false }, threeDS: true, online: true, contactless: true, intl: false,
   limits: { atm: 1500, pos: 8000, online: 4000 },
@@ -54,7 +55,7 @@ export const bal = (n, c = 'LYD', d, opt = {}) => { d = d ?? dp(c || 'LYD'); con
 const ICB = new URL('assets/icons/', document.baseURI).href;
 export const ic = (n, c = '') => `<i class="ic ${c}" style="--i:url(${ICB}${n}.svg)"></i>`;
 export const icf = (n, c = '') => ic(n, 'flip ' + c);
-export const init = (name) => { const p = name.trim().split(/\s+/); return (p[0][0] + (p[1] ? p[1][0] : '')).toUpperCase() };
+export const init = (name) => { const p = name.trim().split(/\s+/).filter(w => /\p{L}/u.test(w[0])); return (p[0][0] + (p[1] ? p[1][0] : '')).toUpperCase() };
 
 /* ---------- motion ---------- */
 export function haptic(ms = 8) { try { if (navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate(ms) } catch (e) {} }
@@ -95,10 +96,10 @@ export function toast(msg, icon = 'success-check') {
 }
 export function sheet(html, o = {}) {
   const host = app(); const sc = document.createElement('div'); sc.className = 'scrim'; const sh = document.createElement('div'); sh.className = 'sheet'; sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-modal', 'true');
-  sh.innerHTML = `<div class="grab"></div><div class="sb">${html}</div>`; host.append(sc, sh);
+  sh.innerHTML = `<div class="grab"></div><div class="sb">${html}</div>`; host.append(sc, sh); document.dispatchEvent(new Event('nm:sheet'));
   requestAnimationFrame(() => { sc.classList.add('on'); anim(sh, [{ transform: 'translateY(105%)' }, { transform: 'translateY(0)' }], { duration: 560 }) });
   let closed = false;
-  const close = (v) => { if (closed) return; closed = true; sc.classList.remove('on'); anim(sh, [{ transform: 'translateY(0)' }, { transform: 'translateY(105%)' }], { duration: 260, easing: 'cubic-bezier(.5,0,.8,.4)' }).finished.then(() => { sc.remove(); sh.remove(); o.onClose && o.onClose(v) }) };
+  const close = (v) => { if (closed) return; closed = true; sc.classList.remove('on'); anim(sh, [{ transform: 'translateY(0)' }, { transform: 'translateY(105%)' }], { duration: 260, easing: 'cubic-bezier(.5,0,.8,.4)' }).finished.then(() => { sc.remove(); sh.remove(); document.dispatchEvent(new Event('nm:sheet')); o.onClose && o.onClose(v) }) };
   sc.addEventListener('click', () => close()); sh.addEventListener('click', e => { if (e.target.closest('[data-close]')) close(e.target.closest('[data-close]').dataset.close) });
   let y0 = null; const grab = $('.grab', sh); grab.style.touchAction = 'none';
   grab.addEventListener('pointerdown', e => { y0 = e.clientY; grab.setPointerCapture(e.pointerId) }); grab.addEventListener('pointermove', e => { if (y0 != null) sh.style.transform = `translateY(${Math.max(0, e.clientY - y0)}px)` }); grab.addEventListener('pointerup', e => { if (y0 != null && e.clientY - y0 > 90) close(); else sh.style.transform = ''; y0 = null });

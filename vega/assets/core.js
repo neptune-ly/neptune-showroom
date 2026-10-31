@@ -1,5 +1,4 @@
-// Vega showroom core: state, i18n (EN/FR/AR), formatting (Western digits), icons, motion helpers, fake QR, charts.
-// Demonstration — simulated data. No network, no backend.
+// Vega core: state, i18n (EN/FR/AR), formatting (Western digits), icons, motion helpers, QR art, charts.
 export const LS = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
@@ -68,7 +67,7 @@ export function moneyT(minor, { sign = false, dec = 2 } = {}) {
   return (minor < 0 ? '−' : sign ? '+' : '') + s;
 }
 export function money(minor, { cur = st.cur, sign = false, dec = 2, nocur = false } = {}) {
-  const s = moneyT(minor, { sign, dec }), m = s.match(/^(.*?)([.,]\d{2,3})$/);
+  const s = moneyT(minor, { sign, dec }), m = dec ? s.match(/^(.*?)([.,]\d+)$/) : null;
   return `<span class="num">${m ? `${m[1]}<span class="dim">${m[2]}</span>` : s}</span>${nocur ? '' : `<span class="cur">${cur}</span>`}`;
 }
 export const num = (n, dec = 0) => `<span class="num">${numT(n, dec)}</span>`;
@@ -142,7 +141,7 @@ export function qrSvg(seed, { size = 220, fg = 'currentColor', n = 29, logo = tr
   let d = '';
   g.forEach((row, y) => row.forEach((on, x) => { if (on) d += `M${x} ${y}h1v1h-1z`; }));
   const c = n / 2;
-  return `<svg viewBox="0 0 ${n} ${n}" width="${size}" height="${size}" shape-rendering="crispEdges" role="img" aria-label="QR code (simulated)"><path d="${d}" fill="${fg}"/>${logo ? `<g transform="translate(${c - 2.5} ${c - 2.5})"><rect width="5" height="5" rx="1.2" fill="var(--look-brand)"/><path d="M1.1 1.4 2.5 3.8 3.9 1.4" stroke="var(--look-on-brand)" stroke-width=".55" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>` : ''}</svg>`;
+  return `<svg viewBox="0 0 ${n} ${n}" width="${size}" height="${size}" shape-rendering="crispEdges" role="img" aria-label="QR code"><path d="${d}" fill="${fg}"/>${logo ? `<g transform="translate(${c - 2.5} ${c - 2.5})"><rect width="5" height="5" rx="1.2" fill="var(--look-brand)"/><path d="M1.1 1.4 2.5 3.8 3.9 1.4" stroke="var(--look-on-brand)" stroke-width=".55" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>` : ''}</svg>`;
 }
 
 /* ---------- inline SVG charts (animated with CSS classes) ---------- */

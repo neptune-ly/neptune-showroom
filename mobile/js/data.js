@@ -35,16 +35,16 @@ export const CATS = {
 };
 // d: days ago, h hour, a signed amount LYD
 const raw = [
-  [0, 9, 'Bakery Al Nakheel', 'مخبز النخيل', 'food', -14.5, 'card', 'Card ••4821'], [0, 8, 'Metro fare top-up', 'شحن بطاقة المترو', 'trans', -20, 'wal', 'Wallet'],
-  [1, 19, 'Omar Mansour', 'عمر منصور', 'tr', -250, 'out', 'Fast transfer'], [1, 13, 'Greenfield Market', 'سوق جرينفيلد', 'food', -86.3, 'card', 'Card ••4821'],
-  [2, 20, 'Cinema Lumière', 'سينما لوميير', 'fun', -45, 'card', 'Card ••4821'], [2, 11, 'Salma Farouk', 'سلمى فاروق', 'tr', 120, 'in', 'LYPay'],
-  [3, 9, 'Electricity — monthly', 'الكهرباء — شهري', 'bills', -74.8, 'bill', 'Bill payment'], [4, 15, 'Atlas Fashion', 'أطلس للأزياء', 'shop', -310, 'card', 'Card ••4821'],
-  [5, 10, 'Salary — Delta Logistics', 'راتب — دلتا للوجستيات', 'inc', 6200, 'in', 'Standing credit'], [6, 18, 'Fuel station 12', 'محطة وقود 12', 'trans', -60, 'card', 'Card ••4821'],
-  [7, 12, 'Mobile top-up', 'شحن رصيد الهاتف', 'bills', -30, 'bill', 'Top-up'], [8, 14, 'Blue Harbor Café', 'مقهى الميناء الأزرق', 'food', -38.2, 'card', 'Card ••4821'],
-  [9, 17, 'Youssef Karam', 'يوسف كرم', 'tr', 400, 'in', 'OnePay'], [10, 10, 'Streaming subscription', 'اشتراك بث', 'fun', -22, 'card', 'Card ••4821'],
-  [11, 16, 'Home Depot Plus', 'هوم ديبو بلس', 'shop', -189.9, 'card', 'Card ••4821'], [12, 9, 'Internet — monthly', 'الإنترنت — شهري', 'bills', -95, 'bill', 'Bill payment'],
-  [13, 20, 'Zayn Restaurant', 'مطعم زين', 'food', -112.4, 'card', 'Card ••4821'], [14, 11, 'Savings round-up', 'تجميع الفكة', 'tr', -18.35, 'out', 'Round-ups'],
-  [16, 13, 'Pharmacy Noor', 'صيدلية نور', 'shop', -54.6, 'card', 'Card ••4821'], [18, 9, 'Water — monthly', 'المياه — شهري', 'bills', -28, 'bill', 'Bill payment'],
+  [0, 9, 'Bakery Al Nakheel', 'مخبز النخيل', 'food', -14.5, 'card', 'Card •••• 4821'], [0, 8, 'Metro fare top-up', 'شحن بطاقة المترو', 'trans', -20, 'wal', 'Wallet'],
+  [1, 19, 'Omar Mansour', 'عمر منصور', 'tr', -250, 'out', 'Fast transfer'], [1, 13, 'Greenfield Market', 'سوق جرينفيلد', 'food', -86.3, 'card', 'Card •••• 4821'],
+  [2, 20, 'Cinema Lumière', 'سينما لوميير', 'fun', -45, 'card', 'Card •••• 4821'], [2, 11, 'Salma Farouk', 'سلمى فاروق', 'tr', 120, 'in', 'LYPay'],
+  [3, 9, 'Electricity — monthly', 'الكهرباء — شهري', 'bills', -74.8, 'bill', 'Bill payment'], [4, 15, 'Atlas Fashion', 'أطلس للأزياء', 'shop', -310, 'card', 'Card •••• 4821'],
+  [5, 10, 'Salary — Delta Logistics', 'راتب — دلتا للوجستيات', 'inc', 6200, 'in', 'Standing credit'], [6, 18, 'Fuel station 12', 'محطة وقود 12', 'trans', -60, 'card', 'Card •••• 4821'],
+  [7, 12, 'Mobile top-up', 'شحن رصيد الهاتف', 'bills', -30, 'bill', 'Top-up'], [8, 14, 'Blue Harbor Café', 'مقهى الميناء الأزرق', 'food', -38.2, 'card', 'Card •••• 4821'],
+  [9, 17, 'Youssef Karam', 'يوسف كرم', 'tr', 400, 'in', 'OnePay'], [10, 10, 'Streaming subscription', 'اشتراك بث', 'fun', -22, 'card', 'Card •••• 4821'],
+  [11, 16, 'Home Depot Plus', 'هوم ديبو بلس', 'shop', -189.9, 'card', 'Card •••• 4821'], [12, 9, 'Internet — monthly', 'الإنترنت — شهري', 'bills', -95, 'bill', 'Bill payment'],
+  [13, 20, 'Zayn Restaurant', 'مطعم زين', 'food', -112.4, 'card', 'Card •••• 4821'], [14, 11, 'Savings round-up', 'تجميع الفكة', 'tr', -18.35, 'out', 'Round-ups'],
+  [16, 13, 'Pharmacy Noor', 'صيدلية نور', 'shop', -54.6, 'card', 'Card •••• 4821'], [18, 9, 'Water — monthly', 'المياه — شهري', 'bills', -28, 'bill', 'Bill payment'],
   [20, 18, 'Hana Rashid', 'هناء رشيد', 'tr', -150, 'out', 'Fast transfer'], [22, 10, 'Salary — Delta Logistics', 'راتب — دلتا للوجستيات', 'inc', 6200, 'in', 'Standing credit'],
 ];
 export const TX = raw.map((r, i) => ({ id: 'T' + (84120 + 40 - i), d: r[0], h: r[1], en: r[2], ar: r[3], cat: r[4], a: r[5], via: r[6], note: r[7], date: (() => { const x = dAgo(r[0]); x.setHours(r[1], (i * 7) % 60); return x })() }));
@@ -72,10 +72,10 @@ export const RATES = [
   ['GBP', 6.11, 6.18, [6.02, 6.05, 6.08, 6.07, 6.10, 6.12, 6.11]], ['TRY', 0.142, 0.149, [0.15, 0.149, 0.147, 0.146, 0.145, 0.143, 0.142]],
 ];
 export const NOTES = [
-  { ic: 'transfer', t: ['Transfer received', 'Virement reçu', 'تم استلام تحويل'], s: ['Salma Farouk sent you 120.00 LYD', 'Salma Farouk vous a envoyé 120,00 LYD', 'أرسلت لك سلمى فاروق 120.00 د.ل'], ago: ['2h', '2 h', 'منذ ساعتين'], tone: 'ok', unread: 1 },
-  { ic: 'request', t: ['Payment request', 'Demande de paiement', 'طلب دفع'], s: ['Youssef Karam requests 75.00 LYD', 'Youssef Karam demande 75,00 LYD', 'يطلب يوسف كرم 75.00 د.ل'], ago: ['5h', '5 h', 'منذ 5 ساعات'], tone: 'warn', unread: 1 },
+  { ic: 'transfer', t: ['Transfer received', 'Virement reçu', 'تم استلام تحويل'], s: ['Salma Farouk sent you 120.000 LYD', 'Salma Farouk vous a envoyé 120.000 LYD', 'أرسلت لك سلمى فاروق 120.000 د.ل'], ago: ['2h', '2 h', 'منذ ساعتين'], tone: 'ok', unread: 1 },
+  { ic: 'request', t: ['Payment request', 'Demande de paiement', 'طلب دفع'], s: ['Youssef Karam requests 75.000 LYD', 'Youssef Karam demande 75.000 LYD', 'يطلب يوسف كرم 75.000 د.ل'], ago: ['5h', '5 h', 'منذ 5 ساعات'], tone: 'warn', unread: 1 },
   { ic: 'security-shield', t: ['New device sign-in blocked', 'Connexion bloquée sur nouvel appareil', 'تم حظر دخول من جهاز جديد'], s: ['Review it in the Security centre', 'À vérifier dans le Centre de sécurité', 'راجعه في مركز الأمان'], ago: ['Yesterday', 'Hier', 'أمس'], tone: 'bad', unread: 1 },
-  { ic: 'bill', t: ['Bill due soon', 'Facture à échéance', 'فاتورة مستحقة قريباً'], s: ['Internet — 95.00 LYD due in 3 days', 'Internet — 95,00 LYD dans 3 jours', 'الإنترنت — 95.00 د.ل خلال 3 أيام'], ago: ['Yesterday', 'Hier', 'أمس'], tone: '' },
+  { ic: 'bill', t: ['Bill due soon', 'Facture à échéance', 'فاتورة مستحقة قريباً'], s: ['Internet — 95.000 LYD due in 3 days', 'Internet — 95.000 LYD dans 3 jours', 'الإنترنت — 95.000 د.ل خلال 3 أيام'], ago: ['Yesterday', 'Hier', 'أمس'], tone: '' },
   { ic: 'goal', t: ['Goal on track', 'Objectif en bonne voie', 'الهدف على المسار'], s: ['Summer trip is 68% funded', 'Voyage d\'été financé à 68 %', 'رحلة الصيف ممولة بنسبة 68%'], ago: ['2d', '2 j', 'منذ يومين'], tone: 'f2' },
 ];
 export const GOALS = [

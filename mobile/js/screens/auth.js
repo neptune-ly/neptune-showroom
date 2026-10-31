@@ -79,11 +79,28 @@ A.unpin = () => tab('login');
 
 /* onboarding: the live Polaris module (single path constant; the build script stages shared/ next to this folder) */
 export const POLARIS_URL = '../shared/polaris/polaris.js';
+// The module ships showroom wording; customer-facing copy for this app is set here ([en, ar, fr], the module's order).
+const PL_TEXT = {
+  'po.honest': ['', '', ''],
+  'po.intro.sub': ['Three quick steps, about two minutes.', 'ثلاث خطوات سريعة في نحو دقيقتين.', 'Trois étapes rapides, environ deux minutes.'],
+  'po.intro.privacy': ['Your photos are used only to verify your identity.', 'تُستخدم صورك للتحقق من هويتك فقط.', 'Vos photos servent uniquement à vérifier votre identité.'],
+  'po.intro.models': ['Getting the camera ready…', 'جارٍ تجهيز الكاميرا…', 'Préparation de la caméra…'],
+  'po.intro.models_ready': ['Ready when you are', 'جاهز عندما تكون جاهزاً', 'Prêt quand vous l’êtes'],
+  'po.perm.body': ['We use the camera to read your passport and to check that it is really you.', 'نستخدم الكاميرا لقراءة جوازك والتأكد من أنك أنت.', 'Nous utilisons la caméra pour lire votre passeport et vérifier que c’est bien vous.'],
+  'po.demo_badge': ['Sample images', 'صور نموذجية', 'Images d’exemple'],
+  'po.opt.demo': ['Use sample images', 'استخدم صوراً نموذجية', 'Utiliser des images d’exemple'],
+  'po.perm.noneBody': ['This device has no camera we can use. You can use sample images or upload photos.', 'لا توجد كاميرا قابلة للاستخدام على هذا الجهاز. يمكنك استخدام صور نموذجية أو رفع صور.', 'Cet appareil n’a pas de caméra utilisable. Vous pouvez utiliser des images d’exemple ou importer des photos.'],
+  'po.opt.demo_note': ['Prepared photos of a sample passport and face.', 'صور جاهزة لجواز وصورة شخصية نموذجيين.', 'Photos préparées d’un passeport et d’un visage d’exemple.'],
+  'po.m.est': ['Estimated score', 'درجة تقديرية', 'Score estimé'],
+  'po.m.est_note': ['Sample images are compared by an estimate, not a full face check.', 'تُقارَن الصور النموذجية بتقدير، لا بفحص كامل للوجه.', 'Les images d’exemple sont comparées par une estimation, pas par un contrôle complet du visage.'],
+  'po.m.geo_note': ['A full face check was not possible on this device, so this score is an estimate.', 'تعذّر إجراء فحص كامل للوجه على هذا الجهاز، لذا هذه الدرجة تقديرية.', 'Un contrôle complet du visage n’a pas été possible sur cet appareil : ce score est une estimation.']
+};
 reg('onboarding', () => ({
   title: t('Account opening'), body: `<div class="pl-host" id="plh"></div>`,
   async mount(el) {
     const host = $('#plh', el); let P;
     try { P = await import(/* @vite-ignore */ new URL(POLARIS_URL, document.baseURI).href) } catch (e) { host.innerHTML = `<div class="empty"><b>${t('Identity verification')}</b><small>${t('Identity verification needs a connection. Please try again shortly.')}</small></div>`; return }
+    try { Object.assign((await import(new URL('strings.js', new URL(POLARIS_URL, document.baseURI)).href)).DICT, PL_TEXT) } catch (e) {}
     el.classList.add('pl-full'); const p = P.mount(host, { lang: S.lang, camera: 'auto', continueLabel: T('Continue', 'Continuer', 'متابعة') }); window.polaris = p; el._pl = p;
     p.on('result', e => { window.lastResult = e }); p.on('close', () => { p.destroy(); window.polaris = null; back() });
     p.on('continue', e => { const r = window.lastResult || e || {}; if (r.decision === 'accepted') { p.destroy(); window.polaris = null; go('onb-done', { doc: r.document || {}, mode: r.mode }) } else if (r.decision === 'review') { p.destroy(); window.polaris = null; back(); setTimeout(() => toast(T('Sent for manual review. We will contact you.', 'Envoyé pour vérification manuelle. Nous vous contacterons.', 'تم الإرسال للمراجعة اليدوية وسنتواصل معك.'), 'info'), 400) } else { p.restart() } });
@@ -93,7 +110,7 @@ reg('onb-done', ({ doc }) => {
   const f = (doc && (doc.fields || doc)) || {}; const nm = [f.givenNames || f.given || '', f.surname || ''].join(' ').trim();
   return { bar: false, body: `<div class="done"><svg class="ck" viewBox="0 0 120 120"><circle class="c1" cx="60" cy="60" r="52" fill="none" stroke="var(--ok)" stroke-width="7" pathLength="1"/><path class="c2" d="M38 62 54 78 84 44" fill="none" stroke="var(--ok)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/></svg>
     <h1 class="rv" style="--d:3">${t('Account created')}</h1><p class="muted rv" style="--d:4">${t('Identity verified on this device.')}</p>
-    <div class="group rv" style="--d:5"><div class="row kvr"><div class="tx"><small>${t('Account holder')}</small><b>${esc(nm || uname())}</b></div></div><div class="row kvr"><div class="tx"><small>${t('Account')}</small><b>${tx(['Current account', 'Compte courant', 'الحساب الجاري'])} · <span class="num">•• 4821</span></b></div></div><div class="row kvr"><div class="tx"><small>${t('Bank')}</small><b>${esc(bankName())}</b></div></div></div>
+    <div class="group rv" style="--d:5"><div class="row kvr"><div class="tx"><small>${t('Account holder')}</small><b>${esc(nm || uname())}</b></div></div><div class="row kvr"><div class="tx"><small>${t('Account')}</small><b>${tx(['Current account', 'Compte courant', 'الحساب الجاري'])} · <span class="num">•••• 4821</span></b></div></div><div class="row kvr"><div class="tx"><small>${t('Bank')}</small><b>${esc(bankName())}</b></div></div></div>
     <div class="actions"><button class="btn" data-act="enterapp">${t('Continue')}</button></div></div>`, mount(el) { $('.ck', el).classList.add('go') } };
 });
 A.enterapp = () => enter();

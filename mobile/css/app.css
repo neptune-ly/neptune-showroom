@@ -51,6 +51,8 @@ button{cursor:pointer;border:0;background:none;padding:0;text-align:inherit}
 h1,h2,h3,p{margin:0}
 [hidden]{display:none!important}
 .num,.ltr{direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums;display:inline-block}
+/* a block .num is laid out LTR, so pin its alignment to the RTL column it sits in */
+[dir=rtl] .tx .num{text-align:right}[dir=rtl] .end .num{text-align:left}
 .disp{font-family:var(--f-disp);font-weight:700;letter-spacing:-.005em}
 .muted{color:var(--look-muted)}
 :focus-visible{outline:3px solid var(--sky);outline-offset:2px;border-radius:12px}
@@ -187,10 +189,15 @@ input[type=range]{width:100%;height:36px;accent-color:#0A9AA0;direction:ltr}
 .pin .dots i{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--look-muted);transition:background .15s,transform .25s var(--spring),box-shadow .15s}
 .pin .dots i.f{background:var(--look-ink);box-shadow:none;transform:scale(1.1)}
 .pin .dots.ok i{background:var(--ok);box-shadow:none}
+.pin .dots.bad i{background:var(--bad);box-shadow:none}.pin .dots.bad{animation:pinshake .4s}
+@keyframes pinshake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 .pin .keys{margin:10px auto 0;max-width:310px}
 
 /* floating glass dock: four tabs and the raised QR pay button */
 .nav{position:absolute;z-index:20;inset-inline:14px;bottom:calc(10px + var(--sab));height:70px;display:grid;grid-template-columns:1fr 1fr 78px 1fr 1fr;align-items:center;padding:0 6px;border-radius:30px;background:var(--dock);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);box-shadow:0 0 0 1px var(--dock-line),0 18px 40px -14px rgba(7,49,95,.45)}
+/* keeps content from reading through the translucent dock */
+.app::after{content:"";position:absolute;z-index:19;inset-inline:0;bottom:0;height:calc(var(--sab) + 110px);background:linear-gradient(to bottom,transparent,var(--look-canvas) 62%);pointer-events:none;opacity:0;transition:opacity .3s}
+.app:has(>.nav[data-on="1"])::after{opacity:1}
 .nav button{height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;font-weight:700;color:var(--look-muted);border-radius:22px;position:relative;transition:color .2s}
 .nav button .l{white-space:nowrap}
 .nav button .ic{width:24px;height:24px;transition:transform .35s var(--spring)}

@@ -26,7 +26,7 @@ export const dayHead = (d, list) => { const tot = sum(list.map(x => x.a)); retur
 export const dayGroups = list => [...new Set(list.map(x => x.d))].map(d => { const l = list.filter(x => x.d === d); return `${dayHead(d, l)}<div class="group plain">${l.map(txRow).join('')}</div>` }).join('');
 
 const qa = (cls, ico, label, go_, p) => `<button class="qa ${cls}" data-go="${go_}" data-p='${JSON.stringify(p || {})}'><i class="qi">${ic(ico)}</i><span>${t(label)}</span></button>`;
-const accPill = a => `${tx(a.name)} · <span class="num">•• ${a.no}</span> ${ic('chevron-down', 's')}`;
+const accPill = a => `${tx(a.name)} · <span class="num">•••• ${a.no}</span> ${ic('chevron-down', 's')}`;
 
 reg('home', () => {
   const a = accBy(S.homeAcc || 'cur'); const unread = NOTES.filter(n => n.unread).length;

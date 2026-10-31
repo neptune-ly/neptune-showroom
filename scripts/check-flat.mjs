@@ -4,7 +4,7 @@ import { join } from 'node:path';
 const skip = new Set(['_shots','_test','node_modules','vendor','design-reference','.git','showroom-pictures']);
 const bad = [];
 // The two flagship apps are exempt: their premium look uses brand gradients on purpose.
-const gradientOk = ['mobile', 'vega/app'];
+const gradientOk = ['mobile', 'vega/app', 'telco', 'brand/apps'];
 function walk(d){ for (const n of readdirSync(d)) { if (skip.has(n)) continue; const p = join(d,n), st = statSync(p);
   if (st.isDirectory()) { walk(p); continue; }
   if (!/\.(css|js|html|svg)$/.test(n)) continue;

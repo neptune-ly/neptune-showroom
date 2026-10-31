@@ -17,7 +17,7 @@ L([
   ['Digital', 'Numériques', 'رقمية'], ['Cash at ATM', 'Cash au DAB', 'نقدية من الصراف'], ['Ready to use', 'Prêt à l\'emploi', 'جاهزة للاستخدام'], ['Gift sent', 'Cadeau envoyé', 'تم إرسال الهدية'], ['No vouchers yet', 'Aucun bon pour l\'instant', 'لا توجد قسائم بعد'], ['Buy your first voucher from the store.', 'Achetez votre premier bon dans la boutique.', 'اشترِ أول قسيمة من المتجر.'],
   ['Create voucher', 'Créer un bon', 'إنشاء قسيمة'], ['Cash voucher', 'Bon de retrait', 'قسيمة سحب نقدي'], ['Withdraw at any ATM without your card', 'Retirez à tout DAB sans carte', 'اسحب من أي صراف بدون بطاقة'], ['Expires in {h}h', 'Expire dans {h} h', 'تنتهي خلال {h} س'], ['Redeemed', 'Utilisé', 'مستخدمة'],
   ['Enter this code at the ATM', 'Saisissez ce code au DAB', 'أدخل هذا الرمز في الصراف'], ['Voucher created', 'Bon créé', 'تم إنشاء القسيمة'], ['Valid for 24 hours', 'Valable 24 heures', 'صالحة لمدة 24 ساعة'], ['Amount to withdraw', 'Montant à retirer', 'المبلغ المراد سحبه'],
-  ['Search vouchers', 'Rechercher un bon', 'ابحث في القسائم'], ['Hey, this one is for you.', 'Coucou, celui-ci est pour toi.', 'هذه الهدية لك.'], ['Message', 'Message', 'الرسالة'],
+  ['Search vouchers', 'Rechercher un bon', 'ابحث في القسائم'], ['Enter 10 to 1,000 in multiples of 10', 'Saisissez de 10 à 1 000, par multiples de 10', 'أدخل من 10 إلى 1,000 بمضاعفات العشرة'], ['Insufficient balance', 'Solde insuffisant', 'الرصيد غير كافٍ'], ['Hey, this one is for you.', 'Coucou, celui-ci est pour toi.', 'هذه الهدية لك.'], ['Message', 'Message', 'الرسالة'],
 ]);
 
 const catIc = { telecom: 'phone', stream: 'tv', game: 'star', shop: 'shopping-bag', food: 'bag2' };
@@ -99,4 +99,15 @@ reg('myvouchers', () => ({
 }));
 A.vopen = b => { const v = S.myv[+b.dataset.i], x = vb(v.id); sheet(`<div class="auth"><h2>${t('Voucher code')}</h2>${ticket(x, v).replace('class="ticket" style="--n:342px"', 'class="ticket flat"')}</div>`) };
 A.vshow = b => sheet(`<div class="auth"><h2>${t('Voucher code')}</h2><div class="vcode num disp">${b.dataset.c}</div><div class="qimg sm">${qrSvg(b.dataset.c, 25, 6)}</div><p class="sub">${t('Enter this code at the ATM')}</p><div class="amt disp">${num(+b.dataset.a, 0)} <small>${cur('LYD')}</small></div><button class="btn tonal" data-close="x">${t('Done')}</button></div>`);
-A.newv = () => sheet(`<h2>${t('Create voucher')}</h2><p class="sub">${t('Valid for 24 hours')}</p><div class="amount-in"><input id="va" inputmode="decimal" value="100" aria-label="${t('Amount to withdraw')}"><div class="cur">${cur('LYD')}</div></div><button class="btn" data-close="ok">${t('Create voucher')}</button>`, { onClose: async v => { if (v !== 'ok') return; const ok = await authorize({ title: t('Create voucher'), amount: 100, rows: [[t('Fee'), t('Free')]] }); if (ok) { VCH.unshift({ code: '7' + (100 + VCH.length) + ' 2046', a: 100, s: 'a', h: 24 }); const l = $('#vl'); if (l) l.innerHTML = VCH.map(vrow).join(''); toast(t('Voucher created'), 'gift') } } });
+// ATMs pay out in notes: whole multiples of 10, up to 1,000 per voucher and never above the balance.
+A.newv = () => { let amt = 0; sheet(`<h2>${t('Create voucher')}</h2><p class="sub">${t('Valid for 24 hours')}</p><div class="amount-in"><input id="va" inputmode="numeric" maxlength="4" value="100" aria-label="${t('Amount to withdraw')}"><div class="cur">${cur('LYD')}</div></div><p class="amt-sub" id="ve" role="alert"></p><button class="btn" id="vgo">${t('Create voucher')}</button>`, {
+  mount(sh, close) {
+    $('#vgo', sh).onclick = () => {
+      const raw = $('#va', sh).value.trim(), v = /^\d+$/.test(raw) ? +raw : NaN, e = $('#ve', sh);
+      const err = !(v >= 10 && v <= 1000 && v % 10 === 0) ? t('Enter 10 to 1,000 in multiples of 10') : v > accBy('cur').bal ? t('Insufficient balance') : '';
+      e.textContent = err; e.classList.toggle('bad', !!err); if (err) return haptic(30);
+      amt = v; close('ok');
+    };
+  },
+  onClose: async v => { if (v !== 'ok') return; const ok = await authorize({ title: t('Create voucher'), amount: amt, rows: [[t('Fee'), t('Free')]] }); if (ok) { VCH.unshift({ code: '7' + (100 + VCH.length) + ' 2046', a: amt, s: 'a', h: 24 }); const l = $('#vl'); if (l) l.innerHTML = VCH.map(vrow).join(''); toast(t('Voucher created'), 'gift') } }
+}) };

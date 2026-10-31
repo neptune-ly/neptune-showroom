@@ -26,16 +26,15 @@ reg('send', {
     const list = CONTACTS.filter(c => !q || (c.en + c.ar + c.ph).toLowerCase().includes(q));
     const favs = CONTACTS.filter(c => c.fav);
     return scr(`<label class="searchbar rise">${ic('search', 'sm')}<input class="sinp" type="search" placeholder="${t('s_to')}" value="${esc(el._q || '')}" aria-label="${t('search')}"></label>
-      <div class="seg rise" role="tablist">${['s_m1', 's_m2', 's_m3'].map((k, i) => `<button role="tab" aria-selected="${i === 0}">${t(k)}</button>`).join('')}</div>
       ${q ? '' : `<section class="stack s8 rise"><div class="muted small b grp">${t('s_fav')}</div><div class="favrow">${favs.map(c => `<button class="fav" data-go="sendamt" data-p='{"c":"${c.id}"}'>${avatar(nm(c), +c.id.slice(1) - 1, 'big')}<span>${nm(c).split(' ')[0]}</span></button>`).join('')}</div></section>`}
       <section class="stack s8 rise"><div class="muted small b grp">${t('s_all')}</div><div class="list" data-sk>${list.map((c, i) => row({ lead: avatar(nm(c), i), title: esc(nm(c)), sub: `<span class="num">${c.ph}</span>`, end: `<span class="badge info">${t('onvega')}</span>`, go: 'sendamt', p: { c: c.id } })).join('')}
-        ${row({ icon: 'phone', title: t('s_new'), go: 'sendamt', p: { c: 'new' } })}${row({ icon: 'accounts', title: t('s_bank'), go: 'sendamt', p: { c: 'c5' } })}</div></section>`, { head: hdr(t('s_title')) });
+        ${row({ icon: 'accounts', title: t('s_bank'), go: 'sendamt', p: { c: 'c5' } })}</div></section>`, { head: hdr(t('s_title')) });
   },
   mount(el) { const i = $('.sinp', el); i?.addEventListener('input', () => { el._q = i.value; const pos = i.selectionStart; rerender(el); const n = $('.sinp', el); n.focus(); n.setSelectionRange(pos, pos); $$('.rise', el).forEach(x => { x.style.animation = 'none'; x.style.opacity = 1; }); }); }
 });
 
 /* ---------- send: amount ---------- */
-const who = id => id === 'new' ? { en: 'New number', ar: 'رقم جديد', ph: '+000 9• ••• ••••' } : person(id);
+const who = id => id === 'new' ? { en: 'New number', ar: 'رقم جديد', ph: '+218 9• ••• ••••' } : person(id);
 const amtBlock = (hint = '') => `<div class="amt"><div class="amt-row"><span class="amt-v disp" data-amt>0</span><span class="amt-c disp">${st.cur}</span></div><div class="amt-hint small" data-hint>${hint}</div></div>`;
 reg('sendamt', {
   skel: false,

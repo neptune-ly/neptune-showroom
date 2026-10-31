@@ -17,7 +17,7 @@ add({
   ch_a1: 'I found your pending transfer to Omar Tahir (25.00). It is waiting on the receiving bank and usually settles within 10 minutes. You will get a notification.§J’ai trouvé votre virement en attente vers Omar Tahir (25,00). Il attend la banque réceptrice, généralement réglé en 10 minutes.§وجدت تحويلك المعلّق إلى عمر طاهر (25.00). ينتظر مصرف المستلم وعادةً يُسوّى خلال 10 دقائق وسيصلك إشعار.', ch_a2: 'I can open a dispute for you. Pick the payment and we will freeze the funds with the merchant while we review.§Je peux ouvrir un litige. Choisissez le paiement, nous bloquerons les fonds chez le marchand pendant l’examen.§يمكنني فتح اعتراض. اختر العملية وسنحجز المبلغ لدى التاجر أثناء المراجعة.', ch_a3: 'You are on Tier 1. Verifying your ID and a selfie raises your daily limit to 25,000.§Vous êtes au niveau 1. Vérifier votre identité et un selfie porte le plafond à 25 000.§أنت في المستوى 1. توثيق الهوية وصورة شخصية يرفعان حدك اليومي إلى 25,000.', ch_a4: 'Connecting you with a specialist… average wait is under 2 minutes.§Mise en relation avec un conseiller… attente moyenne < 2 minutes.§جارٍ تحويلك إلى مختص… متوسط الانتظار أقل من دقيقتين.', ch_a0: 'Thanks — I’ve noted that. Is there anything else I can check?§Merci, c’est noté. Autre chose à vérifier ?§شكراً، سجّلت ذلك. هل هناك شيء آخر أتحقق منه؟', ch_open_rc: 'Open transfer§Ouvrir le virement§افتح التحويل', ch_open_kyc: 'Start verification§Vérifier§ابدأ التوثيق',
   hp_title: 'Help centre§Centre d’aide§مركز المساعدة', hp_q1: 'How do I cash in at an agent?§Comment déposer chez un agent ?§كيف أودع نقداً لدى وكيل؟', hp_a1: 'Open Cash in, choose a nearby agent, enter the amount and show the one-time code. Your balance updates the moment the agent confirms.§Ouvrez Dépôt, choisissez un agent, saisissez le montant et montrez le code. Le solde est mis à jour dès confirmation.§افتح إيداع نقدي واختر وكيلاً قريباً وأدخل المبلغ واعرض الرمز. يتحدّث رصيدك فور تأكيد الوكيل.', hp_q2: 'Why was my payment declined?§Pourquoi mon paiement est refusé ?§لماذا رُفضت عمليتي؟', hp_a2: 'Most often the daily limit for your tier was reached or the balance was too low. Check Limits & tier.§Le plus souvent, plafond du jour atteint ou solde insuffisant. Consultez Plafonds et niveau.§غالباً بسبب بلوغ الحد اليومي لمستواك أو نقص الرصيد. راجع الحدود والمستوى.', hp_q3: 'Can I use Vega without a bank account?§Puis-je utiliser Vega sans compte bancaire ?§هل أستطيع استخدام Vega دون حساب مصرفي؟', hp_a3: 'Yes. Vega is a standalone wallet. Fund it at an agent, by transfer or from a linked card.§Oui, c’est un portefeuille autonome : alimentez-le chez un agent, par virement ou carte liée.§نعم، Vega محفظة مستقلة. موّلها عند وكيل أو بتحويل أو ببطاقة مرتبطة.', hp_q4: 'How do I freeze a lost card?§Comment bloquer une carte perdue ?§كيف أجمّد بطاقة مفقودة؟', hp_a4: 'Cards → select the card → Freeze. It takes effect instantly and you can unfreeze any time.§Cartes → choisissez la carte → Bloquer. Effet immédiat, réversible.§البطاقات ← اختر البطاقة ← تجميد. يسري فوراً ويمكنك إلغاؤه في أي وقت.', hp_contact: 'Contact us§Nous contacter§تواصل معنا', hp_call: 'Call§Appeler§اتصال', hp_mail: 'Email§E-mail§بريد',
   w1t: 'Send money like a message§Envoyez de l’argent comme un message§أرسل المال كأنه رسالة', w1s: 'Instant, free between wallets, any time of day.§Instantané, gratuit entre portefeuilles, à toute heure.§فوري ومجاني بين المحافظ في أي وقت.', w2t: 'Pay anywhere with one scan§Payez partout d’un scan§ادفع في أي مكان بمسحة واحدة', w2s: 'Shops, cafés, taxis — and earn cashback.§Commerces, cafés, taxis — avec remise.§متاجر ومقاهٍ وسيارات أجرة — مع استرداد نقدي.', w3t: 'Cash in and out, nearby§Dépôt et retrait à proximité§إيداع وسحب بالقرب منك', w3s: 'A network of verified agents on every street.§Un réseau d’agents vérifiés dans chaque rue.§شبكة وكلاء موثّقين في كل شارع.', w_start: 'Get started§Commencer§ابدأ الآن', w_skip: 'Skip§Passer§تخطّي', w_have: 'I already have a wallet§J’ai déjà un portefeuille§لدي محفظة بالفعل',
-  su_title: 'Your phone number§Votre numéro§رقم هاتفك', su_s: 'We will text you a 6-digit code§Nous vous enverrons un code à 6 chiffres§سنرسل لك رمزاً من 6 أرقام', su_cc: 'Country§Pays§الدولة', su_terms: 'I agree to the Terms and Privacy Policy§J’accepte les conditions et la politique de confidentialité§أوافق على الشروط وسياسة الخصوصية', otp_title: 'Enter the code§Saisissez le code§أدخل الرمز', otp_s: 'Sent to {p}§Envoyé au {p}§أُرسل إلى {p}', otp_resend: 'Resend in {s}s§Renvoyer dans {s} s§إعادة الإرسال خلال {s} ث', otp_ok: 'Verified§Vérifié§تم التحقق',
+  su_title: 'Your phone number§Votre numéro§رقم هاتفك', su_s: 'We will text you a 6-digit code§Nous vous enverrons un code à 6 chiffres§سنرسل لك رمزاً من 6 أرقام', su_cc: 'Country§Pays§الدولة', su_ly: 'Libya (+218)§Libye (+218)§ليبيا (+218)', su_terms: 'I agree to the Terms and Privacy Policy§J’accepte les conditions et la politique de confidentialité§أوافق على الشروط وسياسة الخصوصية', otp_title: 'Enter the code§Saisissez le code§أدخل الرمز', otp_s: 'Sent to {p}§Envoyé au {p}§أُرسل إلى {p}', otp_resend: 'Resend in {s}s§Renvoyer dans {s} s§إعادة الإرسال خلال {s} ث', otp_ok: 'Verified§Vérifié§تم التحقق',
   lk_title: 'Welcome back, {n}§Bon retour, {n}§أهلاً بعودتك، {n}', lk_s: 'Enter your PIN to unlock§Saisissez votre PIN§أدخل رمز PIN لفتح التطبيق', lk_forgot: 'Forgot PIN?§PIN oublié ?§نسيت الرمز؟'
 });
 
@@ -48,7 +48,7 @@ reg('welcome', {
 reg('signup', {
   skel: false,
   render() {
-    return scr(`<div class="field rise"><label>${t('su_cc')}</label><div class="inp row"><span class="lead f1" style="width:32px;height:32px;border-radius:8px">+0</span><span class="sp b">Country code (+000)</span>${ic('chevron-down', 'sm')}</div></div>
+    return scr(`<div class="field rise"><label>${t('su_cc')}</label><div class="inp row"><span class="lead f1" style="width:32px;height:32px;border-radius:8px">LY</span><span class="sp b">${t('su_ly')}</span>${ic('chevron-down', 'sm')}</div></div>
       <div class="field rise"><label for="ph">${t('su_title')}</label><input id="ph" class="inp num" inputmode="tel" value="91 555 0142" style="font-size:20px;font-weight:700;letter-spacing:.04em"></div>
       <label class="card flat row rise" style="cursor:pointer"><button class="switch" role="switch" aria-checked="true" data-own="1" id="tc"></button><span class="small sp">${t('su_terms')}</span></label>`, { head: hdr(t('su_title'), { sub: t('su_s') }), foot: `<button class="btn block lg" id="sg">${t('next')}</button>` });
   },
@@ -57,7 +57,7 @@ reg('signup', {
 reg('otp', {
   skel: false,
   render() {
-    return scr(`<div class="otp rise" dir="ltr">${[0, 1, 2, 3, 4, 5].map(i => `<b data-o="${i}"></b>`).join('')}</div><p class="center small muted" data-rs>${t('otp_resend', { s: '<span class="num">28</span>' })}</p><div class="center rise"><span class="badge ok hide" data-ok>${ic('success-check', 'sm')} ${t('otp_ok')}</span></div>`, { head: hdr(t('otp_title'), { sub: t('otp_s', { p: '<span class="num">+000 91 555 0142</span>' }) }), foot: `<button class="btn block lg" id="ot" disabled>${t('next')}</button>` });
+    return scr(`<div class="otp rise" dir="ltr">${[0, 1, 2, 3, 4, 5].map(i => `<b data-o="${i}"></b>`).join('')}</div><p class="center small muted" data-rs>${t('otp_resend', { s: '<span class="num">28</span>' })}</p><div class="center rise"><span class="badge ok hide" data-ok>${ic('success-check', 'sm')} ${t('otp_ok')}</span></div>`, { head: hdr(t('otp_title'), { sub: t('otp_s', { p: '<span class="num">+218 91 555 0142</span>' }) }), foot: `<button class="btn block lg" id="ot" disabled>${t('next')}</button>` });
   },
   mount(el) {
     const boxes = $$('[data-o]', el), code = '482915'; let i = 0;
@@ -98,6 +98,22 @@ reg('me', {
 
 /* ---------- KYC upgrade + onboarding: live Neptune Polaris module, one constant path (staged builds copy shared/ next to app/) ---------- */
 export const POLARIS_JS = '../../shared/polaris/polaris.js';
+// The module ships showroom wording; customer-facing copy is set here ([en, ar, fr], the module's order). Same text as Neptune Mobile.
+const PL_TEXT = {
+  'po.honest': ['', '', ''],
+  'po.intro.sub': ['Three quick steps, about two minutes.', 'ثلاث خطوات سريعة في نحو دقيقتين.', 'Trois étapes rapides, environ deux minutes.'],
+  'po.intro.privacy': ['Your photos are used only to verify your identity.', 'تُستخدم صورك للتحقق من هويتك فقط.', 'Vos photos servent uniquement à vérifier votre identité.'],
+  'po.intro.models': ['Getting the camera ready…', 'جارٍ تجهيز الكاميرا…', 'Préparation de la caméra…'],
+  'po.intro.models_ready': ['Ready when you are', 'جاهز عندما تكون جاهزاً', 'Prêt quand vous l’êtes'],
+  'po.perm.body': ['We use the camera to read your passport and to check that it is really you.', 'نستخدم الكاميرا لقراءة جوازك والتأكد من أنك أنت.', 'Nous utilisons la caméra pour lire votre passeport et vérifier que c’est bien vous.'],
+  'po.demo_badge': ['Sample images', 'صور نموذجية', 'Images d’exemple'],
+  'po.opt.demo': ['Use sample images', 'استخدم صوراً نموذجية', 'Utiliser des images d’exemple'],
+  'po.perm.noneBody': ['This device has no camera we can use. You can use sample images or upload photos.', 'لا توجد كاميرا قابلة للاستخدام على هذا الجهاز. يمكنك استخدام صور نموذجية أو رفع صور.', 'Cet appareil n’a pas de caméra utilisable. Vous pouvez utiliser des images d’exemple ou importer des photos.'],
+  'po.opt.demo_note': ['Prepared photos of a sample passport and face.', 'صور جاهزة لجواز وصورة شخصية نموذجيين.', 'Photos préparées d’un passeport et d’un visage d’exemple.'],
+  'po.m.est': ['Estimated score', 'درجة تقديرية', 'Score estimé'],
+  'po.m.est_note': ['Sample images are compared by an estimate, not a full face check.', 'تُقارَن الصور النموذجية بتقدير، لا بفحص كامل للوجه.', 'Les images d’exemple sont comparées par une estimation, pas par un contrôle complet du visage.'],
+  'po.m.geo_note': ['A full face check was not possible on this device, so this score is an estimate.', 'تعذّر إجراء فحص كامل للوجه على هذا الجهاز، لذا هذه الدرجة تقديرية.', 'Un contrôle complet du visage n’a pas été possible sur cet appareil : ce score est une estimation.']
+};
 add({ po_fail: 'Identity module unavailable — using the placeholder§Module d’identité indisponible — version simplifiée§وحدة الهوية غير متاحة — نسخة مبسطة', po_ok: 'Identity verified — Tier 2 unlocked§Identité vérifiée — niveau 2 débloqué§تم التحقق — فُتح المستوى 2', po_review: 'Sent to manual review§Envoyé en revue manuelle§أُرسل للمراجعة اليدوية', po_retake: 'Please try again§Veuillez réessayer§يرجى المحاولة مجدداً' });
 reg('polaris', {
   skel: false,
@@ -105,6 +121,7 @@ reg('polaris', {
   async mount(el, p) {
     const host = $('#polhost', el); let pol;
     try { const m = await import(POLARIS_JS); const cam = new URLSearchParams(location.search).get('camera') || 'auto';
+      try { Object.assign((await import(new URL('strings.js', new URL(POLARIS_JS, import.meta.url)).href)).DICT, PL_TEXT); } catch (e) {}
       pol = m.mount(host, { lang: st.lang, camera: cam, allowDemo: true, allowUpload: true }); el._pol = pol; window.polaris = pol; }
     catch (e) { console.warn('[polaris] unavailable', e); toast(t('po_fail'), 'warning'); back(); go('kycflow'); return; }
     let last = null;
@@ -176,11 +193,11 @@ const instant = el => $$('.rise', el).forEach(x => { x.style.animation = 'none';
 /* ---------- settings / security ---------- */
 reg('settings', {
   render() {
-    return scr(`<section class="stack s8 rise"><div class="muted small b grp">${t('set_lang')}</div><div class="seg" id="sl">${[['en', 'English'], ['fr', 'Français'], ['ar', 'العربية']].map(([k, n]) => `<button aria-selected="${st.lang === k}" data-l="${k}">${n}</button>`).join('')}</div><p class="tiny muted">${t('set_dir')}</p></section>
-      <section class="stack s8 rise"><div class="muted small b grp">${t('set_theme')}</div><div class="seg">${['light', 'dark'].map(k => `<button aria-selected="${st.theme === k}" data-th="${k}">${ic(k === 'light' ? 'sun' : 'moon', 'sm')} ${t(k)}</button>`).join('')}</div></section>
+    return scr(`<section class="stack s8 rise"><div class="muted small b grp">${t('set_lang')}</div><div class="seg" id="sl">${[['en', 'English'], ['fr', 'Français'], ['ar', 'العربية']].map(([k, n]) => `<button aria-pressed="${st.lang === k}" data-l="${k}">${n}</button>`).join('')}</div><p class="tiny muted">${t('set_dir')}</p></section>
+      <section class="stack s8 rise"><div class="muted small b grp">${t('set_theme')}</div><div class="seg">${['light', 'dark'].map(k => `<button aria-pressed="${st.theme === k}" data-th="${k}">${ic(k === 'light' ? 'sun' : 'moon', 'sm')} ${t(k)}</button>`).join('')}</div></section>
       <section class="stack s8 rise"><div class="list"><div class="item"><span class="sp t">${t('set_motion')}</span>${switchEl('mo', !store.motion)}</div></div></section>
       <section class="stack s8 rise"><div class="muted small b grp">${t('set_notif')}</div><div class="list">${['set_n1', 'set_n2', 'set_n3'].map((k, i) => `<div class="item"><span class="sp t">${t(k)}</span>${switchEl('n' + i, i !== 1)}</div>`).join('')}</div></section>
-      <section class="stack s8 rise"><div class="list">${row({ icon: 'refresh', title: t('set_replay'), go: 'welcome' })}${row({ icon: 'info', title: t('set_about'), sub: t('set_ver') })}</div></section>`, { head: hdr(t('set_title')) });
+      <section class="stack s8 rise"><div class="list">${row({ icon: 'info', title: t('set_about'), sub: t('set_ver') })}</div></section>`, { head: hdr(t('set_title')) });
   },
   mount(el) {
     el.addEventListener('click', e => { const l = e.target.closest('[data-l]'), th = e.target.closest('[data-th]'); if (l) setLang(l.dataset.l); if (th) setTheme(th.dataset.th); const m = e.target.closest('[data-sw=mo]'); if (m) { setTimeout(() => { store.motion = m.getAttribute('aria-checked') !== 'true'; document.documentElement.dataset.motion = store.motion ? '' : 'off'; }, 20); } });

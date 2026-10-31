@@ -3,6 +3,7 @@ import { st, t, add, ic, esc, money, moneyT, numT, tenantName, vegaMark, fmtDate
 import { reg, hdr, scr, nm, go, back, sheet, closeSheet, toast, pin, processing, switchEl, wait, rerender, $, $$ } from './kit.js';
 import { S, MERCH } from './data.js';
 import { bIcon } from './s-services.js';
+import { catGlyph } from './glyphs.js';
 
 const bar = (v, cls = '') => `<span class="thin ${cls}"><i style="width:${Math.min(100, v)}%"></i></span>`;
 const plain = h => `<div class="rows plain">${h}</div>`;
@@ -14,15 +15,15 @@ const gl = s => `<div class="gl">${s}</div>`;
 reg('pockets', {
   render() {
     const tot = S.pockets.reduce((a, p) => a + p.saved, 0);
-    return scr(big(t('pk_saved'), money(tot, { nocur: true })) + plain(S.pockets.map(p => `<button class="lr" data-go="pocket" data-p='{"id":"${p.id}"}'><span class="lri">${ic(p.icon)}</span><span class="lt"><b>${nm(p.name)}</b><small>${t('pk_goal', { g: money(p.goal, { dec: 0 }) })}</small>${bar(p.saved / p.goal * 100)}</span><span class="le"><b>${money(p.saved, { nocur: true, dec: 0 })}</b></span></button>`).join('')) +
+    return scr(big(t('pk_saved'), money(tot, { nocur: true })) + plain(S.pockets.map(p => `<button class="lr" data-go="pocket" data-p='{"id":"${p.id}"}'><span class="lri">${ic(p.icon)}</span><span class="lt"><b>${esc(nm(p.name))}</b><small>${t('pk_goal', { g: money(p.goal, { dec: 0 }) })}</small>${bar(p.saved / p.goal * 100)}</span><span class="le"><b>${money(p.saved, { nocur: true, dec: 0 })}</b></span></button>`).join('')) +
       plain(`<div class="lr"><span class="lt"><b>${t('pk_roundup')}</b><small>${t('pk_roundup_s')}</small></span>${switchEl('ru', true)}</div>`), { head: hdr(t('pk_title')), foot: `<button class="btn block lg" data-go="pocketnew">${t('pk_new')}</button>` });
   }
 });
 reg('pocket', {
   render({ id }) {
     const p = S.pockets.find(x => x.id === id) || S.pockets[0];
-    return scr(big(nm(p.name), money(p.saved, { nocur: true }), t('pk_goal', { g: money(p.goal, { dec: 0 }) })) + bar(p.saved / p.goal * 100, 'tall') + `<p class="small muted center">${t('pk_eta', { d: t('pk_eta_v') })}</p>` +
-      plain(lr(ic('refresh'), t('pk_rules'), p.rule === 'weekly' ? t('pk_rule_weekly', { a: money(p.amt, { dec: 0 }) }) : p.rule === 'roundup' ? t('pk_rule_roundup') : t('pk_rule_none'), '', '', 'div') + `<div class="lr"><span class="lt"><b>${t('pk_lock')}</b></span>${switchEl('lk', !!p.locked)}</div>`), { head: hdr(nm(p.name)), foot: `<button class="btn block lg" data-act="add">${t('pk_add')}</button><button class="btn text block" data-act="take" ${p.locked ? 'disabled' : ''}>${t('pk_take')}</button>` });
+    return scr(big(esc(nm(p.name)), money(p.saved, { nocur: true }), t('pk_goal', { g: money(p.goal, { dec: 0 }) })) + bar(p.saved / p.goal * 100, 'tall') + `<p class="small muted center">${t('pk_eta', { d: t('pk_eta_v') })}</p>` +
+      plain(lr(ic('refresh'), t('pk_rules'), p.rule === 'weekly' ? t('pk_rule_weekly', { a: money(p.amt, { dec: 0 }) }) : p.rule === 'roundup' ? t('pk_rule_roundup') : t('pk_rule_none'), '', '', 'div') + `<div class="lr"><span class="lt"><b>${t('pk_lock')}</b></span>${switchEl('lk', !!p.locked)}</div>`), { head: hdr(esc(nm(p.name))), foot: `<button class="btn block lg" data-act="add">${t('pk_add')}</button><button class="btn text block" data-act="take" ${p.locked ? 'disabled' : ''}>${t('pk_take')}</button>` });
   },
   mount(el, { id }) {
     const p = S.pockets.find(x => x.id === id) || S.pockets[0];
@@ -39,10 +40,11 @@ reg('pocket', {
 const CATS = [['groceries', 61860], ['food', 38200], ['bills', 38400], ['transport', 24000], ['shopping', 23100], ['health', 9200]];
 reg('insights', {
   render(p, el) {
-    const mk = el._m || 'sep', k = { sep: 1, aug: 1.05, jul: .9 }[mk], tot = Math.round(CATS.reduce((a, c) => a + c[1], 0) * k);
-    return scr(`<div class="seg">${['sep', 'aug', 'jul'].map(x => `<button aria-selected="${mk === x}" data-m="${x}">${t('m_' + x)}</button>`).join('')}</div>` + big(t('in_spent', { m: t('m_' + mk) }), money(tot, { nocur: true }), mk === 'sep' ? t('in_vs', { p: '4.5' }) : '') +
-      gl(t('in_cats')) + plain(CATS.map(([c, v]) => lr('', t('cat_' + c), bar(v * k / tot * 220), money(Math.round(v * k), { nocur: true, dec: 0 }), '', 'div')).join('')) +
-      gl(t('in_budget')) + plain([['food', 38200, 40000], ['groceries', 61860, 80000], ['shopping', 23100, 20000]].map(([c, u, b]) => lr('', t('cat_' + c), bar(u / b * 100, u > b ? 'warn' : ''), `${money(u, { nocur: true, dec: 0 })} / ${money(b, { nocur: true, dec: 0 })}`, '', 'div')).join('')) +
+    const mk = +(el._m || 0), k = [1, 1.05, .9][mk], tot = Math.round(CATS.reduce((a, c) => a + c[1], 0) * k);
+    const mon = o => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - o); return fmtDate(d, { month: 'long' }); }, cap = s => s[0].toUpperCase() + s.slice(1);
+    return scr(`<div class="seg">${[0, 1, 2].map(x => `<button aria-pressed="${mk === x}" data-m="${x}">${cap(mon(x))}</button>`).join('')}</div>` + big(t('in_spent', { m: st.lang === 'fr' ? mon(mk) : cap(mon(mk)) }), money(tot, { nocur: true }), mk === 0 ? t('in_vs', { p: '4.5' }) : '') +
+      gl(t('in_cats')) + plain(CATS.map(([c, v]) => lr(catGlyph(c, 20), t('cat_' + c), bar(v * k / tot * 220), money(Math.round(v * k), { nocur: true, dec: 0 }), '', 'div')).join('')) +
+      gl(t('in_budget')) + plain([['food', 38200, 40000], ['groceries', 61860, 80000], ['shopping', 23100, 20000]].map(([c, u, b]) => lr('', t('cat_' + c), bar(u / b * 100, u > b ? 'warn' : ''), `<bdi dir="ltr">${money(u, { nocur: true, dec: 0 })} / ${money(b, { nocur: true, dec: 0 })}</bdi>`, '', 'div')).join('')) +
       gl(t('in_top')) + plain([['m2', 22000], ['m1', 18500], ['m4', 14000]].map(([m, a]) => lr('', esc(nm(MERCH.find(x => x.id === m))), '', money(-a, { nocur: true }), '', 'div')).join('')), { head: hdr(t('in_title')) });
   },
   mount(el) { el.addEventListener('click', e => { const m = e.target.closest('[data-m]'); if (m) { el._m = m.dataset.m; rerender(el); } }); }
@@ -120,7 +122,7 @@ reg('limits', {
     const cur = S.kyc.tier, T = [['l_t0', 'l_t0s', '500'], ['l_t1', 'l_t1s', '5,000'], ['l_t2', 'l_t2s', '25,000'], ['l_t3', 'l_t3s', '100,000']];
     const U = [['l_day', 145000, 500000], ['l_mon', 720000, 2000000], ['l_max', S.balance, 1000000], ['l_cash', 50000, 200000]];
     return scr(gl(t('l_tiers')) + plain(T.map(([a, b, d], i) => lr(i < cur ? ic('success-check', 'sm') : `<b>${i}</b>`, t(a), t(b), i === cur ? `<span class="badge ok">${t('l_cur')}</span>` : `<span class="num muted">${d}</span>`, '', 'div')).join('')) +
-      gl(t('l_use')) + plain(U.map(([k, u, m]) => lr('', t(k), bar(u / m * 100, u / m > .8 ? 'warn' : ''), `${money(u, { dec: 0, nocur: true })} / ${money(m, { dec: 0, nocur: true })}`, '', 'div')).join('')) +
+      gl(t('l_use')) + plain(U.map(([k, u, m]) => lr('', t(k), bar(u / m * 100, u / m > .8 ? 'warn' : ''), `<bdi dir="ltr">${money(u, { dec: 0, nocur: true })} / ${money(m, { dec: 0, nocur: true })}</bdi>`, '', 'div')).join('')) +
       `<div class="lr"><span class="lt"><b>${t('l_own')}</b><small>${t('l_own_s')}</small></span><b data-capv>${money(300000, { dec: 0 })}</b></div><input type="range" class="rng" min="50000" max="500000" step="10000" value="300000" aria-label="${t('l_own')}">`, { head: hdr(t('l_title')), foot: cur < 2 ? `<button class="btn block lg" data-go="kyc">${t('l_raise')}</button>` : '' });
   },
   mount(el) { const r = $('.rng', el); r.addEventListener('input', () => { $('[data-capv]', el).innerHTML = money(+r.value, { dec: 0 }); }); }

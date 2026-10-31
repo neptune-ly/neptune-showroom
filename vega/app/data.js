@@ -1,17 +1,17 @@
 // Seed data. All names, numbers and codes are fictional.
 import { add, dayOff, st } from '../assets/core.js';
 
-export const ME = { en: 'Amira Haddad', ar: 'أميرة حداد', first: { en: 'Amira', fr: 'Amira', ar: 'أميرة' }, phone: '+000 91 555 0142', handle: '@amira.h', tier: 1 };
+export const ME = { en: 'Amira Haddad', ar: 'أميرة حداد', first: { en: 'Amira', fr: 'Amira', ar: 'أميرة' }, phone: '+218 91 555 0142', handle: '@amira.h', tier: 1 };
 
 export const CONTACTS = [
-  { id: 'c1', en: 'Karim Mansour', ar: 'كريم منصور', ph: '+000 92 555 0111', fav: 1 },
-  { id: 'c2', en: 'Layla Saidi', ar: 'ليلى سعيدي', ph: '+000 91 555 0188', fav: 1 },
-  { id: 'c3', en: 'Omar Tahir', ar: 'عمر طاهر', ph: '+000 94 555 0173', fav: 1 },
-  { id: 'c4', en: 'Nour El-Din', ar: 'نور الدين', ph: '+000 92 555 0129', fav: 1 },
-  { id: 'c5', en: 'Yusuf Barakat', ar: 'يوسف بركات', ph: '+000 93 555 0160', fav: 0 },
-  { id: 'c6', en: 'Mariam Zayed', ar: 'مريم زايد', ph: '+000 91 555 0154', fav: 0 },
-  { id: 'c7', en: 'Hana Rizk', ar: 'هناء رزق', ph: '+000 94 555 0137', fav: 0 },
-  { id: 'c8', en: 'Samir Jaber', ar: 'سمير جابر', ph: '+000 92 555 0199', fav: 0 }
+  { id: 'c1', en: 'Karim Mansour', ar: 'كريم منصور', ph: '+218 92 555 0111', fav: 1 },
+  { id: 'c2', en: 'Layla Saidi', ar: 'ليلى سعيدي', ph: '+218 91 555 0188', fav: 1 },
+  { id: 'c3', en: 'Omar Tahir', ar: 'عمر طاهر', ph: '+218 94 555 0173', fav: 1 },
+  { id: 'c4', en: 'Nour El-Din', ar: 'نور الدين', ph: '+218 92 555 0129', fav: 1 },
+  { id: 'c5', en: 'Yusuf Barakat', ar: 'يوسف بركات', ph: '+218 93 555 0160', fav: 0 },
+  { id: 'c6', en: 'Mariam Zayed', ar: 'مريم زايد', ph: '+218 91 555 0154', fav: 0 },
+  { id: 'c7', en: 'Hana Rizk', ar: 'هناء رزق', ph: '+218 94 555 0137', fav: 0 },
+  { id: 'c8', en: 'Samir Jaber', ar: 'سمير جابر', ph: '+218 92 555 0199', fav: 0 }
 ];
 
 export const MERCH = [

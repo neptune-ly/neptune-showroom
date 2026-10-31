@@ -1,8 +1,8 @@
 // Vega wallet screens: Home (swipeable wallet stack), Wallets, Cards, Top up, Vouchers, Profile, Welcome.
-import { st, t, add, ic, esc, money, moneyT, numT, RM, ring, fmtDate, setLang, setTheme } from '../assets/core.js';
+import { st, t, add, ic, esc, money, moneyT, numT, RM, ring, fmtDate, setLang, setTheme, LS } from '../assets/core.js';
 import { vegaStar, vegaLogo } from './brand.js';
 import { catGlyph, VOUCHERS, VCATS, voucher } from './glyphs.js';
-import { SCR, reg, hdr, scr, row, avatar, nm, store, setMode, go, tab, sheet, closeSheet, toast, pin, processing, switchEl, wait, refNo, bindKeypad, keypadHtml, toMinor, amtDisplay, slideHtml, bindSlide, showSuccess, refresh, rerender, rebuildTabbar, $, $$ } from './kit.js';
+import { SCR, reg, hdr, scr, row, avatar, nm, store, setHide, go, tab, sheet, closeSheet, toast, pin, processing, switchEl, wait, refNo, bindKeypad, keypadHtml, toMinor, amtDisplay, slideHtml, bindSlide, showSuccess, refresh, rerender, rebuildTabbar, $, $$ } from './kit.js';
 import { S, ME, CONTACTS, WALLETS, walBal, RATE_USD, NOTIFS, addTxn, person } from './data.js';
 import { grouped } from './s-home.js';
 
@@ -15,7 +15,7 @@ add({
   q_again: 'Send again§Renvoyer§أرسل مجدداً', q_new: 'New§Nouveau§جديد',
   rg_cb: 'Cashback this month§Remise du mois§استرداد هذا الشهر', rg_goal: 'of {g} goal§sur {g}§من {g}', in_t: 'Spending§Dépenses§الإنفاق', hv_t: 'Vouchers§Bons cadeaux§القسائم', from_v: 'From {a}§Dès {a}§من {a}',
   wl_title: 'Wallets§Portefeuilles§المحافظ', wl_total: 'Total across wallets§Total des portefeuilles§الإجمالي في كل المحافظ', wl_cards: 'Cards§Cartes§البطاقات', wl_pockets: 'Savings goals§Objectifs d’épargne§أهداف الادخار', wl_more: 'Manage money§Gérer l’argent§إدارة الأموال', wl_approx: '≈ {a} LYD§≈ {a} LYD§≈ {a} د.ل',
-  c_net: 'Contactless§Sans contact§لاسلكية', c_sheet_t: 'Card details§Détails de la carte§تفاصيل البطاقة',
+  c_net: 'Contactless§Sans contact§لاسلكية', c_unfreeze: 'Unfreeze card§Débloquer la carte§إلغاء تجميد البطاقة', c_sheet_t: 'Card details§Détails de la carte§تفاصيل البطاقة',
   ci_pick: 'How would you like to add money?§Comment souhaitez-vous ajouter de l’argent ?§كيف تريد إضافة الأموال؟',
   cm_agent: 'At a Vega agent§Chez un agent Vega§لدى وكيل فيغا', cm_agent_s: 'Hand over cash, credited instantly§Remettez des espèces, crédité aussitôt§سلّم النقد ويُضاف فوراً', cm_free: 'Free§Gratuit§مجاني',
   cm_card: 'Debit or credit card§Carte bancaire§بطاقة مصرفية', cm_card_s: 'Instant · 1.2% fee§Instantané · 1,2 % de frais§فوري · رسوم 1.2٪',
@@ -122,7 +122,7 @@ reg('home', {
       if (!store.hideBal) animBal($('[data-bal]', el), walBal(WALLETS[prev]), walBal(w));
     };
     el.addEventListener('click', e => {
-      if (e.target.closest('[data-act=eye]')) { store.hideBal = !store.hideBal; refresh(); return; }
+      if (e.target.closest('[data-act=eye]')) { setHide(!store.hideBal); refresh(); return; }
       const d = e.target.closest('[data-d]'); if (d) return setW(+d.dataset.d);
       const c = e.target.closest('.wc'); if (c && c.dataset.pos !== '0' && !e.target.closest('.pill')) setW(+c.dataset.i);
     });
@@ -149,12 +149,12 @@ reg('wallets', {
   render() {
     const tot = S.balance + walBal(WALLETS[1]) + Math.round(S.usd * RATE_USD), c = S.cards[0];
     return `${hdr(t('wl_title'), { back: false, right: `<button class="iconbtn fill" data-go="pocketnew" aria-label="${t('pk_new')}">${ic('plus')}</button>` })}<div class="body">
-      <section class="wl-tot rise"><div class="eyebrow">${t('wl_total')}</div><div class="bigbal disp">${bigMoney(tot)}<span class="curchip">LYD</span></div></section>
+      <section class="wl-tot rise"><div class="eyebrow">${t('wl_total')}</div><div class="bigbal disp"><span>${bigMoney(tot)}</span><span class="curchip">LYD</span></div></section>
       <div class="wl-list rise">${WALLETS.slice(0, 3).map((w, i) => `<button class="wrow tone-${w.tone}" data-wl="${i}"><i class="wc-rings"></i><span class="wr-m"><small class="eyebrow">${esc(wname(w))} · ${w.no}</small><b class="disp">${bigMoney(walBal(w))}<span class="cur">${w.cur}</span></b></span><span class="wr-go">${ic('chevron-right', 'sm flip')}</span></button>`).join('')}</div>
       <section class="blk rise"><div class="sec"><h2>${t('wl_cards')}</h2><button data-go="cards">${t('see_all')}</button></div>
         <button class="cardbtn" data-go="cards" aria-label="${t('c_title')}">${cardFace(c)}</button></section>
       <section class="blk rise"><div class="sec"><h2>${t('wl_pockets')}</h2><button data-go="pockets">${t('see_all')}</button></div>
-        <div class="pgrid">${S.pockets.map(p => `<button class="pk2 tone-${['coral', 'teal', 'navy'][p.f - 1]}" data-go="pocket" data-p='{"id":"${p.id}"}'>${ring(p.saved / p.goal * 100, { size: 58, thick: 7, color: 'currentColor', inner: ic(p.icon, 'sm') })}<b>${nm(p.name)}</b><small class="num">${money(p.saved, { dec: 0, nocur: true })} / ${money(p.goal, { dec: 0, nocur: true })}</small></button>`).join('')}</div></section>
+        <div class="pgrid">${S.pockets.map(p => `<button class="pk2 tone-${['coral', 'teal', 'navy'][p.f - 1]}" data-go="pocket" data-p='{"id":"${p.id}"}'>${ring(p.saved / p.goal * 100, { size: 58, thick: 7, color: 'currentColor', inner: ic(p.icon, 'sm') })}<b>${esc(nm(p.name))}</b><small class="num">${money(p.saved, { dec: 0, nocur: true })} / ${money(p.goal, { dec: 0, nocur: true })}</small></button>`).join('')}</div></section>
       <section class="blk rise"><div class="sec"><h2>${t('wl_more')}</h2></div><div class="rows plain">${[['scheduled', 'calendar', 'sv_sch'], ['exchange', 'swap-exchange', 'sv_fx'], ['limits', 'security-shield', 'sv_lim'], ['statements', 'statement', 'sv_stm']].map(([g, i, k], n) => `<button class="lr" data-go="${g}"><span class="lri tone-${['coral', 'teal', 'navy', 'sand'][n]}">${ic(i)}</span><span class="lt"><b>${t(k)}</b></span>${ic('chevron-right', 'sm flip')}</button>`).join('')}</div></section>
     </div>`;
   },
@@ -214,9 +214,9 @@ reg('topupcard', {
 });
 reg('topupbank', {
   render() {
-    const R = [['tb_name', 'Neptune Vega Payments'], ['tb_iban', 'XX00 0142 7710 5518 0042'], ['tb_ref', 'VG-AMIRA-0142']];
+    const R = [['tb_name', 'Neptune Vega Payments'], ['tb_iban', 'LY38 0021 0001 4277 1055 18'], ['tb_ref', 'VG-AMIRA-0142']];
     return scr(`<div class="note rise">${ic('info', 'sm')}<span class="small">${t('tb_s')}</span></div>
-      <div class="rows plain rise">${R.map(([k, v]) => `<button class="lr" data-copy="${v}"><span class="lt"><small>${t(k)}</small><b class="${k === 'tb_name' ? '' : 'mono'}">${v}</b></span><span class="lri tone-sand">${ic('copy', 'sm')}</span></button>`).join('')}</div>
+      <div class="rows plain rise">${R.map(([k, v]) => `<button class="lr" data-copy="${v}"><span class="lt"><small>${t(k)}</small><b class="${k === 'tb_ref' ? 'mono' : k === 'tb_iban' ? 'num' : ''}" style="white-space:nowrap">${v}</b></span><span class="lri tone-sand">${ic('copy', 'sm')}</span></button>`).join('')}</div>
       <p class="small muted center rise">${t('tb_note')}</p>`, { head: hdr(t('tb_title')), foot: `<button class="btn block lg" data-act="shr">${ic('share', 'sm')} ${t('tb_share')}</button>` });
   },
   mount(el) { el.addEventListener('click', e => { if (e.target.closest('[data-act=shr]')) toast(t('share'), 'share'); }); }
@@ -282,22 +282,20 @@ const grp = (title, rows) => `<section class="blk rise"><div class="sec"><h2>${t
 reg('me', {
   tab: true,
   render() {
-    const biz = store.mode === 'business';
     return `${hdr(t('me_title'), { back: false, right: `<button class="iconbtn fill" data-go="settings" aria-label="${t('set_title')}">${ic('settings')}</button>` })}<div class="body">
-      <section class="mecard rise" data-sk><i class="hero-rings"></i>${avatar(biz ? t('me_name_b') : nm(ME), 2, 'big xl2')}<div class="sp"><div class="disp mc-n">${biz ? t('me_name_b') : esc(nm(ME))}</div><div class="small"><span class="ltr">${ME.handle}</span> · <span class="num">${ME.phone}</span></div><span class="badge glassb">${ic('security-shield', 'sm')} ${t('tier1')}</span></div></section>
+      <section class="mecard rise" data-sk><i class="hero-rings"></i>${avatar(nm(ME), 2, 'big xl2')}<div class="sp"><div class="disp mc-n">${esc(nm(ME))}</div><div class="small"><span class="ltr">${ME.handle}</span> · <span class="num">${ME.phone}</span></div><span class="badge glassb">${ic('security-shield', 'sm')} ${t('tier1')}</span></div></section>
       <button class="upg rise" data-go="kyc"><span class="lri tone-coral">${ic('id-card')}</span><span class="lt"><b>${t('me_up')}</b><small>${t('me_up_s')}</small><span class="thin tall"><i style="width:50%"></i></span></span>${ic('chevron-right', 'sm flip')}</button>
       <section class="blk rise"><div class="sec"><h2>${t('me_quick')}</h2></div>
-        <div class="seg" id="sl">${[['en', 'English'], ['fr', 'Français'], ['ar', 'العربية']].map(([k, n]) => `<button aria-selected="${st.lang === k}" data-l="${k}">${n}</button>`).join('')}</div>
-        <div class="seg" style="margin-top:8px">${['light', 'dark'].map(k => `<button aria-selected="${st.theme === k}" data-th="${k}">${ic(k === 'light' ? 'sun' : 'moon', 'sm')} ${t(k)}</button>`).join('')}</div></section>
+        <div class="seg" id="sl">${[['en', 'English'], ['fr', 'Français'], ['ar', 'العربية']].map(([k, n]) => `<button aria-pressed="${st.lang === k}" data-l="${k}">${n}</button>`).join('')}</div>
+        <div class="seg" style="margin-top:8px">${['light', 'dark'].map(k => `<button aria-pressed="${st.theme === k}" data-th="${k}">${ic(k === 'light' ? 'sun' : 'moon', 'sm')} ${t(k)}</button>`).join('')}</div></section>
       ${grp(t('me_acct'), [['limits', 'id-card', 'me_id', 'tier1', 'coral'], ['cards', 'card', 'sv_cards', '', 'navy'], ['statements', 'statement', 'sv_stm', '', 'teal'], ['rewards', 'star', 'sv_rw', '', 'amber'], ['referrals', 'users', 'sv_rf', '', 'sky']])}
       ${grp(t('me_prefs'), [['security', 'security-shield', 'me_sec', '', 'teal'], ['settings', 'settings', 'me_set', '', 'sand'], ['notifs', 'bell', 'notifs', '', 'coral']])}
-      <section class="blk rise"><div class="sec"><h2>${t('me_mode')}</h2></div><div class="seg" id="mode"><button aria-selected="${!biz}" data-m="personal">${t('b_pers')}</button><button aria-selected="${biz}" data-m="business">${t('b_biz')}</button></div></section>
       ${grp(t('me_help'), [['support', 'chat', 'me_sup', '', 'sky'], ['help', 'info', 'me_faq', '', 'sand'], ['welcome', 'logout', 'me_out', '', 'navy']])}
       <p class="tiny muted center">${t('me_ver')}</p></div>`;
   },
   mount(el) {
     el.addEventListener('click', e => {
-      const m = e.target.closest('[data-m]'); if (m && m.dataset.m !== store.mode) { setMode(m.dataset.m); store.tab = 'home'; tab('home'); rebuildTabbar(); }
+      if (e.target.closest('[data-go=welcome]')) { e.stopPropagation(); LS.set('vega.app.out', '1'); tab('welcome'); return; } // sign out: Back must not return to the wallet
       const l = e.target.closest('[data-l]'), th = e.target.closest('[data-th]'); if (l) setLang(l.dataset.l); if (th) setTheme(th.dataset.th);
     });
   }
