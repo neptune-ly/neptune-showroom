@@ -25,7 +25,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir _site
-          cp index.html _site/ && cp -r site-assets shared hub plus mobile vega telco mizan-portal _site/
+          cp index.html _site/ && cp -r site-assets shared hub plus mobile vega telco mizan-portal privacy support _site/
           find _site -type d \( -name _shots -o -name _test -o -name test -o -name tools -o -name node_modules \) -prune -exec rm -rf {} +
           find _site -type f \( -name '*.md' -o -name '*.map' -o -name '*.py' -o -name '*.sh' \) -not -path '*/vendor/*' -delete
           touch _site/.nojekyll
