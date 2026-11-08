@@ -357,3 +357,4 @@ html,body{height:100%;overflow:hidden}
 .switch::before{content:"";position:absolute;inset:-9px -3px}
 .btn.sm{min-height:48px}.seg button{min-height:44px}
 .scr .opt{min-height:52px}
+.polhost{flex:1;min-height:0}
