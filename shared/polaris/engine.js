@@ -104,11 +104,12 @@ export class Engine {
       const session = await ort.InferenceSession.create(new Uint8Array(buf), { executionProviders: ['wasm'], graphOptimizationLevel: 'all', logSeverityLevel: 4 });
       return { ort, session };
     }));
+    // Android packaging unzips .gz assets and drops the suffix, so ask for the plain file there.
     this.loadOcr = once(async () => this._track('ocr', async () => {
       if (!globalThis.Tesseract) await loadScript(this.base + 'tesseract/tesseract.min.js');
       const w = await globalThis.Tesseract.createWorker('eng', 1, {
         workerPath: this.base + 'tesseract/worker.min.js', corePath: this.base + 'tesseract/core/', langPath: this.base + 'tesseract/lang/',
-        gzip: true, workerBlobURL: false, cacheMethod: 'none', logger: () => {},
+        gzip: globalThis.Capacitor?.getPlatform?.() !== 'android', workerBlobURL: false, cacheMethod: 'none', logger: () => {},
       });
       await w.setParameters({ tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<', preserve_interword_spaces: '0', tessedit_pageseg_mode: '6' });
       return w;
