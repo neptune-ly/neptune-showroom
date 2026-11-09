@@ -17,6 +17,8 @@ npx cap sync ios >/dev/null
 # Apple requires iOS 15+ from April 2027 (ITMS-90068); Capacitor 7 generates 14.
 sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = 14.0/IPHONEOS_DEPLOYMENT_TARGET = 15.0/' ios/App/App.xcodeproj/project.pbxproj
 sed -i '' 's/\.iOS(\.v14)/.iOS(.v15)/' ios/App/CapApp-SPM/Package.swift
+# iPhone only: a universal build would require 13-inch iPad screenshots.
+sed -i '' 's/TARGETED_DEVICE_FAMILY = "1,2"/TARGETED_DEVICE_FAMILY = 1/' ios/App/App.xcodeproj/project.pbxproj
 cat > /tmp/export-$APP.plist <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
